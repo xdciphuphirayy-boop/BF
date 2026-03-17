@@ -204,7 +204,9 @@
 
 if getgenv().mode == "Oneclick" then
     -- Oneclick script here
-    local Stats = game:GetService("Stats")
+    local Stats     = game:GetService("Stats")
+    local Players   = game:GetService("Players")
+    local player    = Players.LocalPlayer  -- define player ให้ถูกต้อง
 
     local PlayerGui = player:WaitForChild("PlayerGui")
 
@@ -381,13 +383,14 @@ if getgenv().mode == "Oneclick" then
                 info2.Text = "FPS: "..fps.." | Ping: "..ping.."ms | Sea: "..sea
             end
 
-            -- ────────────────────────────────────────────────────────
-
             -- UPDATE KEY TIME
-
-            -- ────────────────────────────────────────────────────────
-
-            local ok, timeMsg = checkKey()
+            -- checkKey() ถูกเรียกจาก loader ภายนอก ถ้าไม่มีให้แสดง N/A
+            local ok, timeMsg
+            if type(checkKey) == "function" then
+                ok, timeMsg = checkKey()
+            else
+                ok, timeMsg = true, "Key: N/A"
+            end
 
             info3.Text = timeMsg
 
@@ -5765,7 +5768,7 @@ end)
 task.spawn(function()
 	while true do
 		task.wait(0.1)
-		if not Second_World_Quest_Func then -- (removed goto) end
+		if Second_World_Quest_Func then
 			pcall(function()
 				local progress = CommF:InvokeServer("DressrosaQuestProgress")
 
@@ -5807,7 +5810,7 @@ end)
 task.spawn(function()
 	while true do
 		task.wait(0.1)
-		if not Third_World_Quest_Func then -- (removed goto) end
+		if Third_World_Quest_Func then
 			pcall(function()
 
 				local bartProg = CommF:InvokeServer("BartiloQuestProgress","Bartilo")
