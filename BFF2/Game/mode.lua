@@ -1470,11 +1470,15 @@ local function AbandonCurrentQuest()
 	pcall(function() CommF:InvokeServer("AbandonQuest") end)
 	task.wait(0.5)
 end
+
+local function GetCurrentQuestName()
+	local gui = Player.PlayerGui:FindFirstChild("Main")
+	if not gui then return nil end
 	local questFrame = gui:FindFirstChild("Quest")
 	if not questFrame or not questFrame.Visible then return nil end
 	local titleLbl = questFrame:FindFirstChild("Title")
-	or questFrame:FindFirstChild("QuestName")
-	or questFrame:FindFirstChild("Name")
+		or questFrame:FindFirstChild("QuestName")
+		or questFrame:FindFirstChild("Name")
 	if not titleLbl then
 		for _, v in ipairs(questFrame:GetDescendants()) do
 			if v:IsA("TextLabel") and v.Text ~= "" then
@@ -1484,27 +1488,20 @@ end
 	end
 	return titleLbl and titleLbl.Text or nil
 end
--- ===== QUEST VALIDATION HELPERS =====
 
-local function AcceptQuestSafe()
-	if _QuestAccepting then return end
+local function IsQuestCorrect()
+	if not HasQuest() then return false end
 	if not NameQuest or not Namemon then return false end
-	-- เช็คแค่ว่ามี Quest อยู่ไหม ไม่ต้องเช็คชื่อ
-	-- เพราะชื่อใน GUI อาจไม่ตรงกับ NameQuest string
 	return true
 end
-
-local function GetCurrentQuestName()
-	local gui = Player.PlayerGui:FindFirstChild("Main")
-	if not gui then return nil end
 
 -- ===== AUTO FARM MAIN LOOP (Quest mode) =====
 
 -- flag ป้องกันรับ Quest ซ้ำซ้อน
 local _QuestAccepting = false
 
-local function IsQuestCorrect()
-	if not HasQuest() then return false end
+local function AcceptQuestSafe()
+	if _QuestAccepting then return end
 	_QuestAccepting = true
 	-- รอให้ Quest Complete window หายก่อน (max 3 วิ)
 	local waitCount = 0
