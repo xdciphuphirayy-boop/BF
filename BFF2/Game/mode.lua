@@ -6,6 +6,12 @@
 ║  ค้นหาด้วย Ctrl+G (บรรทัด) หรือ Ctrl+F แล้วพิมพ์ [LINE xxx]   ║
 ╚══════════════════════════════════════════════════════════════════╝
 
+─── KEY SYSTEM (ใช้ร่วมกัน 2 mode)  บรรทัด 217
+  decodeKey()                บรรทัด 219
+  parseDate()                บรรทัด 246
+  toSeconds()                บรรทัด 252
+  checkKey()                 บรรทัด 256
+
 ─── MODE: ONECLICK  (บรรทัด 205) ────────────────────────────────────
   formatNumber()             บรรทัด 217
   Block Other Script UI      บรรทัด 222
@@ -53,21 +59,21 @@
     .attack()                บรรทัด 1063
 
   ── COMBAT HELPERS ─────────────────────────────────────────────
-  BringEnemies()             บรรทัด 1105
+  BringEnemies()             บรรทัด 1217
 
   ── DATA TABLES ────────────────────────────────────────────────
   Game Data (Sea/MaxLevel)   บรรทัด 1128
   Quest Level Data           บรรทัด 1143
 
   ── QUEST & FARM HELPERS ───────────────────────────────────────
-  FindEnemySpawnCF()         บรรทัด 1250
-  GetMyQuest()               บรรทัด 1272
-  GetGuide()                 บรรทัด 1296
-  CheckQuest()               บรรทัด 1317
-  GetCurrentQuestName()      บรรทัด 1371
-  IsQuestCorrect()           บรรทัด 1389
-  AbandonCurrentQuest()      บรรทัด 1397
-  AcceptQuestSafe()          บรรทัด 1407
+  FindEnemySpawnCF()         บรรทัด 1362
+  GetMyQuest()               บรรทัด 1384
+  GetGuide()                 บรรทัด 1408
+  CheckQuest()               บรรทัด 1429
+  GetCurrentQuestName()      บรรทัด 1510
+  IsQuestCorrect()           บรรทัด 1519
+  AbandonCurrentQuest()      บรรทัด 1482
+  AcceptQuestSafe()          บรรทัด 1502
 
   ── FARM LOOPS ─────────────────────────────────────────────────
   Auto Farm Main Loop        บรรทัด 1425
@@ -75,15 +81,15 @@
   Auto Farm Selected Monster บรรทัด 1506
 
   ── CHEST ──────────────────────────────────────────────────────
-  GetAllChests()             บรรทัด 1536
-  GetClosestChest()          บรรทัด 1549
+  GetAllChests()             บรรทัด 1648
+  GetClosestChest()          บรรทัด 1661
   Auto Chest Loop            บรรทัด 1566
 
   ── MISC SYSTEMS ───────────────────────────────────────────────
-  HopServer()                บรรทัด 1600
-  ApplyGlowEffect()          บรรทัด 1622
-  ApplyFPSBoost()            บรรทัด 1635
-  BuyDarkStep()              บรรทัด 1664
+  HopServer()                บรรทัด 1759
+  ApplyGlowEffect()          บรรทัด 1737
+  ApplyFPSBoost()            บรรทัด 1712
+  BuyDarkStep()              บรรทัด 1749
   Auto W (Sea Event)         บรรทัด 1698
   Auto Click                 บรรทัด 1710
   Ken/Buso Haki              บรรทัด 1722
@@ -94,27 +100,27 @@
   Teleport Data              บรรทัด 1797
 
   ── CONFIG SYSTEM ──────────────────────────────────────────────
-  SaveConfig()               บรรทัด 1840
-  LoadConfig()               บรรทัด 1846
+  SaveConfig()               บรรทัด 1968
+  LoadConfig()               บรรทัด 1952
 
   ── LANGUAGE SYSTEM ────────────────────────────────────────────
-  _GetLang()                 บรรทัด 1874
-  T()  (translate key)       บรรทัด 2259
-  TR() (translate label)     บรรทัด 2267
-  RefreshAllLabels()         บรรทัด 2274
-  SetLanguage()              บรรทัด 2286
+  _GetLang()                 บรรทัด 1986
+  T()  (translate key)       บรรทัด 2393
+  TR() (translate label)     บรรทัด 2396
+  RefreshAllLabels()         บรรทัด 2370
+  SetLanguage()              บรรทัด 2387
 
   ── ESP SYSTEM ─────────────────────────────────────────────────
-  ESP_CreateTag()            บรรทัด 2318
-  ESP_UpdateTag()            บรรทัด 2370
+  ESP_CreateTag()            บรรทัด 2430
+  ESP_UpdateTag()            บรรทัด 2482
   Full ESP Loop              บรรทัด 2404
 
   ── UPDATE LOG ─────────────────────────────────────────────────
-  T_change()                 บรรทัด 2483
-  ShowUpdateLog()            บรรทัด 2488
+  T_change()                 บรรทัด 2595
+  ShowUpdateLog()            บรรทัด 2600
 
   ── GUI BUILDER ────────────────────────────────────────────────
-  BuildGUI()                 บรรทัด 2616
+  BuildGUI()                 บรรทัด 2728
   ├─ CreateTab()             บรรทัด 2810
   ├─ CreateToggle()          บรรทัด 2893
   ├─ CreateSectionHeader()   บรรทัด 2963
@@ -130,9 +136,9 @@
   └─ Shutdown()              บรรทัด 4486
 
   ── QUEST LOOPS (หลัง BuildGUI) ────────────────────────────────
-  GetHeartFarmData()         บรรทัด 4602
-  GetObsData()               บรรทัด 4710
-  CheckCakePrinceSpawned()   บรรทัด 4919
+  GetHeartFarmData()         บรรทัด 4810
+  GetObsData()               บรรทัด 4918
+  CheckCakePrinceSpawned()   บรรทัด 5127
   Hearts Farm Loop           บรรทัด 4640
   Mastery Farming Loop       บรรทัด 4677
   Select Materials Loop      บรรทัด 4708
@@ -193,107 +199,101 @@
   Earned Bounty Display      บรรทัด 6186
 
   ── BOSS / MATERIAL / ELITE DATA ───────────────────────────────
-  CheckQuestBoss()           บรรทัด 6196
-  CheckQuestMaterial()       บรรทัด 6267
-  CheckQuestElite()          บรรทัด 6302
-  Elite Hunter Quest Loop    บรรทัด 6314
+  CheckQuestBoss()           บรรทัด 6404
+  CheckQuestMaterial()       บรรทัด 6475
+  CheckQuestElite()          บรรทัด 6510
+  Elite Hunter Quest Loop    บรรทัด 6495
 
-  BuildGUI()  ← เรียกใช้ที่    บรรทัด 6350
+  ── NEW FEATURES ───────────────────────────────────────────────
+  Anti-Kick (hookmetamethod) บรรทัด 6525
+  Auto Re-Distribute Stats   บรรทัด 6542
+  Race V4 / Awakening Quest  บรรทัด 6575
+    ├─ Teleport Race Door    บรรทัด 6609
+    ├─ Auto Trial Race       บรรทัด 6619
+    └─ Auto Train Race       บรรทัด 6634
+  Server Hop (No Fruit/Boss) บรรทัด 6667
+  Auto Collect Flower/Mat    บรรทัด 6732
+  Auto Mastery All Weapons   บรรทัด 6807
+
+  BuildGUI()  ← เรียกใช้ที่    บรรทัด 6861
 
 ]]
+
+-- ============================================================
+-- ===== KEY SYSTEM (ใช้ร่วมกันทั้ง Oneclick และ Normal) =====
+-- ============================================================
+
+local function decodeKey()
+    local b64  = getgenv().Key
+    local seed = getgenv().KeySeed
+    if not b64 or not seed then return nil end
+
+    local b64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    local decoded  = {}
+    local i = 1
+    b64 = b64:gsub("[^"..b64chars.."=]","")
+    while i <= #b64 do
+        local c1,c2,c3,c4 = b64:sub(i,i),b64:sub(i+1,i+1),b64:sub(i+2,i+2),b64:sub(i+3,i+3)
+        local n1 = b64chars:find(c1,1,true)-1
+        local n2 = b64chars:find(c2,1,true)-1
+        local n3 = c3=="=" and 0 or (b64chars:find(c3,1,true)-1)
+        local n4 = c4=="=" and 0 or (b64chars:find(c4,1,true)-1)
+        local bits = n1*262144 + n2*4096 + n3*64 + n4
+        table.insert(decoded, math.floor(bits/65536))
+        if c3~="=" then table.insert(decoded, math.floor(bits/256)%256) end
+        if c4~="=" then table.insert(decoded, bits%256) end
+        i = i + 4
+    end
+    local raw = {}
+    for idx, byte in ipairs(decoded) do
+        table.insert(raw, string.char(bit32.bxor(byte, (seed + idx - 1) % 256)))
+    end
+    return table.concat(raw)
+end
+
+local function parseDate(s)
+    local d,mo,y,h,mi = s:match("(%d+)/(%d+)/(%d+)/(%d+)%.(%d+)")
+    if not d then return nil end
+    return {day=tonumber(d),month=tonumber(mo),year=tonumber(y),hour=tonumber(h),min=tonumber(mi)}
+end
+
+local function toSeconds(t)
+    return t.year*365*24*3600 + t.month*30*24*3600 + t.day*24*3600 + t.hour*3600 + t.min*60
+end
+
+local function checkKey()
+    local raw = decodeKey()
+    if not raw then
+        return false, "❌ ไม่พบ Key กรุณา Get Script ใหม่"
+    end
+    local parts = {}
+    for p in raw:gmatch("[^|]+") do table.insert(parts, p) end
+    if #parts < 2 then
+        return false, "❌ Key ผิดพลาด"
+    end
+    local endDate = parseDate(parts[2])
+    if not endDate then
+        return false, "❌ Key ผิดพลาด"
+    end
+    local now  = os.date("*t")
+    local diff = toSeconds(endDate) - toSeconds(now)
+    if diff <= 0 then
+        return false, "❌ Key หมดอายุแล้ว"
+    end
+    local days  = math.floor(diff / 86400)
+    local hours = math.floor((diff % 86400) / 3600)
+    local mins  = math.floor((diff % 3600) / 60)
+    return true, string.format("✅ Key ถูกต้อง | เหลือ %d วัน %d ชั่วโมง %d นาที", days, hours, mins)
+end
 
 if getgenv().mode == "Oneclick" then
     -- Oneclick script here
     local Stats     = game:GetService("Stats")
     local Players   = game:GetService("Players")
-    local player    = Players.LocalPlayer  -- define player ให้ถูกต้อง
+    local player    = Players.LocalPlayer
 
-    --========================
-    -- DECODE KEY
-    --========================
-    local function decodeKey()
-        local b64 = getgenv().Key
-        local seed = getgenv().KeySeed
-
-        if not b64 or not seed then return nil end
-
-        local b64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-        local decoded = {}
-        local i = 1
-        b64 = b64:gsub("[^"..b64chars.."=]","")
-        while i <= #b64 do
-            local c1,c2,c3,c4 = b64:sub(i,i),b64:sub(i+1,i+1),b64:sub(i+2,i+2),b64:sub(i+3,i+3)
-            local n1 = b64chars:find(c1,1,true)-1
-            local n2 = b64chars:find(c2,1,true)-1
-            local n3 = c3=="=" and 0 or (b64chars:find(c3,1,true)-1)
-            local n4 = c4=="=" and 0 or (b64chars:find(c4,1,true)-1)
-            local bits = n1*262144 + n2*4096 + n3*64 + n4
-            table.insert(decoded, math.floor(bits/65536))
-            if c3~="=" then table.insert(decoded, math.floor(bits/256)%256) end
-            if c4~="=" then table.insert(decoded, bits%256) end
-            i = i + 4
-        end
-
-        local raw = {}
-        for idx, byte in ipairs(decoded) do
-            table.insert(raw, string.char(bit32.bxor(byte, (seed + idx - 1) % 256)))
-        end
-        return table.concat(raw)
-    end
-
-    --========================
-    -- PARSE DATE  dd/mm/yyyy/HH.MM
-    --========================
-    local function parseDate(s)
-        local d,mo,y,h,mi = s:match("(%d+)/(%d+)/(%d+)/(%d+)%.(%d+)")
-        if not d then return nil end
-        return {day=tonumber(d),month=tonumber(mo),year=tonumber(y),hour=tonumber(h),min=tonumber(mi)}
-    end
-
-    local function toSeconds(t)
-        return t.year*365*24*3600 + t.month*30*24*3600 + t.day*24*3600 + t.hour*3600 + t.min*60
-    end
-
-    --========================
-    -- CHECK KEY EXPIRY
-    --========================
-    local function checkKey()
-        local raw = decodeKey()
-        if not raw then
-            return false, "❌ ไม่พบ Key กรุณา Get Script ใหม่"
-        end
-
-        local parts = {}
-        for p in raw:gmatch("[^|]+") do table.insert(parts,p) end
-
-        if #parts < 2 then
-            return false, "❌ Key ผิดพลาด"
-        end
-
-        local endDate = parseDate(parts[2])
-        if not endDate then
-            return false, "❌ Key ผิดพลาด"
-        end
-
-        local now = os.date("*t")
-        local diff = toSeconds(endDate) - toSeconds(now)
-
-        if diff <= 0 then
-            return false, "❌ Key หมดอายุแล้ว"
-        end
-
-        local days  = math.floor(diff / 86400)
-        local hours = math.floor((diff % 86400) / 3600)
-        local mins  = math.floor((diff % 3600) / 60)
-
-        return true, string.format("✅ Key ถูกต้อง | เหลือ %d วัน %d ชั่วโมง %d นาที", days, hours, mins)
-    end
-
-    --========================
-    -- KICK ถ้า KEY ผิด/หมดอายุ
-    --========================
+    -- ตรวจสอบ Key ก่อนโหลด (ใช้ checkKey() จาก global scope)
     local valid, msg = checkKey()
-
     if not valid then
         player:Kick(msg)
         return
@@ -491,6 +491,16 @@ if getgenv().mode == "Oneclick" then
 
 elseif getgenv().mode == "normal" then
 
+	-- ===== ตรวจสอบ Key ก่อนโหลด (Normal Mode) =====
+	do
+		local _valid, _msg = checkKey()
+		if not _valid then
+			local _p = game:GetService("Players").LocalPlayer
+			if _p then _p:Kick(_msg) end
+			return
+		end
+	end
+
 	-- ===== KYX HUB - COMBINED SCRIPT =====
 
 	-- UI Style: KYX HUB (BF_normal style)
@@ -572,6 +582,7 @@ elseif getgenv().mode == "normal" then
 	_G.AutoFarm        = false
 	_G.AutoChest       = false
 	_G.AutoEquipTool   = true
+	Anti_Kick_Func     = true
 	_G.FPSBoost        = false
 	_G.AutoBuyDarkStep = false
 
@@ -1454,11 +1465,11 @@ local function CheckQuest()
 	CFrameQuest  = selected.tp
 end
 
--- ===== QUEST VALIDATION HELPERS =====
 
-local function GetCurrentQuestName()
-	local gui = Player.PlayerGui:FindFirstChild("Main")
-	if not gui then return nil end
+local function AbandonCurrentQuest()
+	pcall(function() CommF:InvokeServer("AbandonQuest") end)
+	task.wait(0.5)
+end
 	local questFrame = gui:FindFirstChild("Quest")
 	if not questFrame or not questFrame.Visible then return nil end
 	local titleLbl = questFrame:FindFirstChild("Title")
@@ -1473,27 +1484,27 @@ local function GetCurrentQuestName()
 	end
 	return titleLbl and titleLbl.Text or nil
 end
+-- ===== QUEST VALIDATION HELPERS =====
 
-local function IsQuestCorrect()
-	if not HasQuest() then return false end
+local function AcceptQuestSafe()
+	if _QuestAccepting then return end
 	if not NameQuest or not Namemon then return false end
 	-- เช็คแค่ว่ามี Quest อยู่ไหม ไม่ต้องเช็คชื่อ
 	-- เพราะชื่อใน GUI อาจไม่ตรงกับ NameQuest string
 	return true
 end
 
-local function AbandonCurrentQuest()
-	pcall(function() CommF:InvokeServer("AbandonQuest") end)
-	task.wait(0.5)
-end
+local function GetCurrentQuestName()
+	local gui = Player.PlayerGui:FindFirstChild("Main")
+	if not gui then return nil end
 
 -- ===== AUTO FARM MAIN LOOP (Quest mode) =====
 
 -- flag ป้องกันรับ Quest ซ้ำซ้อน
 local _QuestAccepting = false
 
-local function AcceptQuestSafe()
-	if _QuestAccepting then return end
+local function IsQuestCorrect()
+	if not HasQuest() then return false end
 	_QuestAccepting = true
 	-- รอให้ Quest Complete window หายก่อน (max 3 วิ)
 	local waitCount = 0
@@ -1683,41 +1694,6 @@ end
 end
 end)
 
--- ===== HOP SERVER =====
-
-local function HopServer()
-	local servers = {}
-	local ok, data = pcall(function()
-	return game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
-end)
-if ok and data then
-	local decoded = game:GetService("HttpService"):JSONDecode(data)
-	if decoded and decoded.data then
-		for _, server in ipairs(decoded.data) do
-			if server.id ~= game.JobId and server.playing < server.maxPlayers then
-				table.insert(servers, server.id)
-			end
-		end
-	end
-end
-if #servers > 0 then
-	TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(#servers)])
-end
-end
-
--- ===== GLOW EFFECT =====
-
-local function ApplyGlowEffect(char)
-	local hl = char:FindFirstChild("UserGlow") or Instance.new("Highlight")
-	hl.Name = "UserGlow"; hl.Parent = char
-	hl.FillColor = Color3.fromRGB(0,255,255)
-	hl.OutlineColor = Color3.fromRGB(255,255,255)
-	hl.FillTransparency = 0.4; hl.OutlineTransparency = 0
-	hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-end
-Player.CharacterAdded:Connect(function(char) ApplyGlowEffect(char) end)
-if Player.Character then ApplyGlowEffect(Player.Character) end
-
 -- ===== FPS BOOST =====
 
 local function ApplyFPSBoost(enabled)
@@ -1743,14 +1719,49 @@ local function ApplyFPSBoost(enabled)
 	end
 end
 
+-- ===== GLOW EFFECT =====
+
+local function ApplyGlowEffect(char)
+	local hl = char:FindFirstChild("UserGlow") or Instance.new("Highlight")
+	hl.Name = "UserGlow"; hl.Parent = char
+	hl.FillColor = Color3.fromRGB(0,255,255)
+	hl.OutlineColor = Color3.fromRGB(255,255,255)
+	hl.FillTransparency = 0.4; hl.OutlineTransparency = 0
+	hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+end
+Player.CharacterAdded:Connect(function(char) ApplyGlowEffect(char) end)
+if Player.Character then ApplyGlowEffect(Player.Character) end
+
+
+local function BuyDarkStep()
+	if dsStatusLbl then dsStatusLbl.Text = "Dark Step:  FLYING TO NPC..."; dsStatusLbl.TextColor3 = Color3.fromRGB(255,200,0) end
+
 -- ===== DARK STEP AUTO BUY =====
 
 local DarkStepBought = false
 local DARKSTEP_PRICE = 150000
 local dsStatusLbl, dsStatusDot
+-- ===== HOP SERVER =====
 
-local function BuyDarkStep()
-	if dsStatusLbl then dsStatusLbl.Text = "Dark Step:  FLYING TO NPC..."; dsStatusLbl.TextColor3 = Color3.fromRGB(255,200,0) end
+local function HopServer()
+	local servers = {}
+	local ok, data = pcall(function()
+	return game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
+end)
+if ok and data then
+	local decoded = game:GetService("HttpService"):JSONDecode(data)
+	if decoded and decoded.data then
+		for _, server in ipairs(decoded.data) do
+			if server.id ~= game.JobId and server.playing < server.maxPlayers then
+				table.insert(servers, server.id)
+			end
+		end
+	end
+end
+if #servers > 0 then
+	TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(#servers)])
+end
+end
 	FlyToGeneral(CFrame.new(0.666,0.562,-0.491), "AutoBuyDarkStep")
 	if not _G.AutoBuyDarkStep then return false end
 	task.wait(1)
@@ -1925,12 +1936,6 @@ local CONFIG_FILE = "kyxhub_config.json"
 
 local _Config = {}
 
-local function SaveConfig()
-	pcall(function()
-		writefile(CONFIG_FILE, game:GetService("HttpService"):JSONEncode(_Config))
-	end)
-end
-
 local function LoadConfig()
 	pcall(function()
 		if isfile and isfile(CONFIG_FILE) then
@@ -1944,6 +1949,12 @@ local function LoadConfig()
 				end
 			end
 		end
+	end)
+end
+
+local function SaveConfig()
+	pcall(function()
+		writefile(CONFIG_FILE, game:GetService("HttpService"):JSONEncode(_Config))
 	end)
 end
 
@@ -2351,20 +2362,18 @@ local function T(key)
 	return t[lang] or t["english"] or key
 end
 
--- ลงทะเบียน label ให้ refresh อัตโนมัติเมื่อเปลี่ยนภาษา
 local function TR(label, key)
 	table.insert(_LangLabels, {lbl=label, key=key})
 	label.Text = T(key)
 	return label
 end
 
--- Refresh ทุก label ที่ลงทะเบียนไว้ (รองรับ prefix/suffix สำหรับ tab/header)
 local function RefreshAllLabels()
 	for _, entry in ipairs(_LangLabels) do
 		pcall(function()
 			if entry.lbl and entry.lbl.Parent then
-				local pre  = entry.prefix or ""
-				local suf  = entry.suffix or ""
+				local pre = entry.prefix or ""
+				local suf = entry.suffix or ""
 				entry.lbl.Text = pre .. T(entry.key) .. suf
 			end
 		end)
@@ -2808,19 +2817,19 @@ local function BuildGUI()
 	KeyExpiryLabel.Size = UDim2.new(0,260,0,11); KeyExpiryLabel.Position = UDim2.new(0,28,0,36)
 	KeyExpiryLabel.BackgroundTransparency = 1; KeyExpiryLabel.TextColor3 = Color3.fromRGB(180,145,50)
 	KeyExpiryLabel.Font = Enum.Font.Gotham; KeyExpiryLabel.TextSize = 9; KeyExpiryLabel.TextXAlignment = Enum.TextXAlignment.Left; KeyExpiryLabel.ZIndex = 3
-	KeyExpiryLabel.Text = "\u{1F511} \u{E01}\u{E33}\u{E25}\u{E31}\u{E07}\u{E15}\u{E23}\u{E27}\u{E08}\u{E2A}\u{E2D}\u{E1A} Key..."
-	-- task.spawn(function()
-	-- while true do
-	-- 	local ok, timeMsg = checkKey()
-	-- 	KeyExpiryLabel.Text = "🔑 " .. timeMsg
-	-- 	if ok then
-	-- 		KeyExpiryLabel.TextColor3 = Color3.fromRGB(180,145,50)
-	-- 	else
-	-- 		KeyExpiryLabel.TextColor3 = Color3.fromRGB(200,60,60)
-	-- 	end
-	-- 	task.wait(60)
-	-- end
-	--end
+	KeyExpiryLabel.Text = "\u{1F511} กำลังตรวจสอบ Key..."
+	task.spawn(function()
+		while true do
+			local ok, timeMsg = checkKey()
+			KeyExpiryLabel.Text = "\u{1F511} " .. timeMsg
+			if ok then
+				KeyExpiryLabel.TextColor3 = Color3.fromRGB(120, 200, 100)
+			else
+				KeyExpiryLabel.TextColor3 = Color3.fromRGB(200, 60, 60)
+			end
+			task.wait(60)
+		end
+	end)
 
 	local MinBtn = Instance.new("TextButton", TitleBar)
 	MinBtn.Text = "\u{2212}"; MinBtn.Size = UDim2.new(0,28,0,28); MinBtn.Position = UDim2.new(1,-68,0.5,-14)
@@ -3289,6 +3298,12 @@ local function BuildGUI()
 
 	CreateSectionHeader(SettingsPage, "SYSTEM")
 	CreateToggle(SettingsPage, "Anti AFK", "\u{E1B}\u{E49}\u{E2D}\u{E07}\u{E01}\u{E31}\u{E19} Kick \u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}", true, function() end)
+	CreateToggle(SettingsPage, "\u{1F6E1}  Anti-Kick", "\u{E1B}\u{E49}\u{E2D}\u{E07}\u{E01}\u{E31}\u{E19} Anti-Cheat Kick", true, function(v)
+		Anti_Kick_Func = v
+	end)
+	CreateToggle(SettingsPage, "\u{1F504}  Auto Re-Distribute Stats", "\u{E43}\u{E2A}\u{E48} Stat \u{E2D}.\u{E15}\u{E41}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}\u{E2B}\u{E25}\u{E31}\u{E07} Reset", true, function(v)
+		Auto_ReDistribute_After_Reset = v
+	end)
 	CreateToggle(SettingsPage, "Fast Attack", "\u{E42}\u{E08}\u{E21}\u{E15}\u{E35}\u{E40}\u{E23}\u{E47}\u{E27}\u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}", true, function(v)
 	AutoAttacks = v; AutoShoot = v
 	end)
@@ -3663,6 +3678,10 @@ local function BuildGUI()
 				function(v) Selected_Skill = v end)
 
 					CreateToggle(SubFarmPage, "Enable Mastery Farm", "\u{E1F}\u{E32}\u{E23}\u{E4C}\u{E21} Mastery Blox Fruit/Gun", false, function(v) Mastery_Farming_Func = v end)
+					CreateToggle(SubFarmPage, "\u{1F504}  Auto Mastery All Weapons", "\u{E27}\u{E19} Melee→Sword→Gun→Fruit \u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}", false, function(v)
+						Auto_Mastery_All_Func = v
+						if not v then Mastery_Farming_Func = false end
+					end)
 
 					CreateSectionHeader(SubFarmPage, "MATERIALS & CHEST")
 					CreateToggle(SubFarmPage, "Auto Farm Chest (All)", "\u{E1F}\u{E32}\u{E23}\u{E4C}\u{E21} Chest \u{E17}\u{E31}\u{E48}\u{E27}\u{E17}\u{E31}\u{E49}\u{E07}\u{E41}\u{E21}\u{E1E}", false, function(v) Farming_Chest_Func = v end)
@@ -3692,6 +3711,9 @@ local function BuildGUI()
 		end)
 	end)
 	CreateButton(SubFarmPage, "Hop Server", function() HopServer() end)
+	CreateSectionHeader(SubFarmPage, "AUTO HOP")
+	CreateToggle(SubFarmPage, "\u{1F352}  Auto Hop (No Fruit)", "\u{E2E}\u{E2D}\u{E1B} Server \u{E40}\u{E21}\u{E37}\u{E48}\u{E2D}\u{E44}\u{E21}\u{E48}\u{E40}\u{E08}\u{E2D} Fruit", false, function(v) Auto_Hop_No_Fruit_Func = v end)
+	CreateToggle(SubFarmPage, "\u{1F480}  Auto Hop (No Boss)",  "\u{E2E}\u{E2D}\u{E1B} Server \u{E40}\u{E21}\u{E37}\u{E48}\u{E2D}\u{E44}\u{E21}\u{E48}\u{E40}\u{E08}\u{E2D} Boss",  false, function(v) Auto_Hop_No_Boss_Func = v end)
 
 	-- ────────────────────────────────────────────────────────
 
@@ -4099,6 +4121,9 @@ local function BuildGUI()
 	-- ────────────────────────────────────────────────────────
 
 	CreateSectionHeader(MiscPage, "FRUITS")
+	CreateSectionHeader(MiscPage, "COLLECT")
+	CreateToggle(MiscPage, "\u{1F33C}  Auto Collect Flower", "\u{E40}\u{E01}\u{E47}\u{E1A} Flower \u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}", false, function(v) Auto_Collect_Flower_Func = v end)
+	CreateToggle(MiscPage, "\u{1F4E6}  Auto Collect Material", "\u{E40}\u{E01}\u{E47}\u{E1A} Material Drop \u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}", false, function(v) Auto_Collect_Material_Func = v end)
 	CreateToggle(MiscPage, "Fruit Notifications", "\u{E41}\u{E08}\u{E49}\u{E07}\u{E40}\u{E15}\u{E37}\u{E2D}\u{E19}\u{E40}\u{E21}\u{E37}\u{E48}\u{E2D} Fruit Spawn",  true,  function(v) Fruit_Notifications_Func = v end)
 	CreateToggle(MiscPage, "Tween to Fruit",       "\u{E27}\u{E32}\u{E1B}\u{E44}\u{E1B}\u{E40}\u{E01}\u{E47}\u{E1A} Fruit \u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}", false, function(v) Tween_To_Fruit_Func = v end)
 	CreateToggle(MiscPage, "Auto Buy Random Fruit","\u{E0B}\u{E37}\u{E49}\u{E2D} Fruit \u{E2A}\u{E38}\u{E48}\u{E21}\u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}",   false, function(v) Buy_Random_Fruit_Func = v end)
@@ -4264,7 +4289,87 @@ local function BuildGUI()
 	end
 	end)
 
-	CreateSectionHeader(StatsPage, "INFO STATS")
+	-- ===== AUTO STAT RESET =====
+
+	Auto_Stat_Reset_Func       = false
+	Auto_Stat_Reset_Level_Func = 0
+	Auto_Stat_Reset_Stats_Func = {"Melee"}
+
+	CreateSectionHeader(StatsPage, "AUTO STAT RESET")
+
+	CreateToggle(StatsPage, "\u{1F504}  Auto Stat Reset", "\u{E23}\u{E35}\u{E40}\u{E0B}\u{E47}\u{E15} Stat \u{E2D}\u{E31}\u{E15}\u{E42}\u{E19}\u{E21}\u{E31}\u{E15}\u{E34}\u{E40}\u{E21}\u{E37}\u{E48}\u{E2D}\u{E16}\u{E36}\u{E07} Level \u{E17}\u{E35}\u{E48}\u{E01}\u{E33}\u{E2B}\u{E19}\u{E14}", false, function(v)
+		Auto_Stat_Reset_Func = v
+	end)
+
+	local resetLevelFrame = Instance.new("Frame", StatsPage)
+	resetLevelFrame.Size = UDim2.new(1,0,0,52); resetLevelFrame.BackgroundColor3 = Theme.MainBG; resetLevelFrame.BorderSizePixel = 0
+	Instance.new("UICorner", resetLevelFrame).CornerRadius = UDim.new(0,9)
+	Instance.new("UIStroke", resetLevelFrame).Color = Theme.Border
+	local rlLbl = Instance.new("TextLabel", resetLevelFrame)
+	rlLbl.Text = "Reset at Level (0 = Max Cap)"; rlLbl.Size = UDim2.new(1,-100,0,18); rlLbl.Position = UDim2.new(0,10,0,6)
+	rlLbl.BackgroundTransparency = 1; rlLbl.TextColor3 = Theme.Text; rlLbl.Font = Enum.Font.GothamBold; rlLbl.TextSize = 12; rlLbl.TextXAlignment = Enum.TextXAlignment.Left
+	local rlDesc = Instance.new("TextLabel", resetLevelFrame)
+	rlDesc.Text = "\u{E43}\u{E2A}\u{E48} 0 = reset \u{E17}\u{E35}\u{E48} level cap \u{E02}\u{E2D}\u{E07}\u{E41}\u{E15}\u{E48}\u{E25}\u{E30}\u{E17}\u{E30}\u{E40}\u{E25} (700/1500/2600)"; rlDesc.Size = UDim2.new(1,-16,0,13); rlDesc.Position = UDim2.new(0,10,0,26)
+	rlDesc.BackgroundTransparency = 1; rlDesc.TextColor3 = Theme.SubText; rlDesc.Font = Enum.Font.Gotham; rlDesc.TextSize = 10; rlDesc.TextXAlignment = Enum.TextXAlignment.Left
+	local rlBox = Instance.new("TextBox", resetLevelFrame)
+	rlBox.Size = UDim2.new(0,70,0,22); rlBox.Position = UDim2.new(1,-80,0.5,-11)
+	rlBox.BackgroundColor3 = Theme.TopBar; rlBox.BorderSizePixel = 0
+	rlBox.Text = "0"; rlBox.TextColor3 = Theme.Accent; rlBox.Font = Enum.Font.GothamBold; rlBox.TextSize = 12; rlBox.ZIndex = 3
+	Instance.new("UICorner", rlBox).CornerRadius = UDim.new(0,6)
+	rlBox.FocusLost:Connect(function()
+		local n = tonumber(rlBox.Text)
+		if n then Auto_Stat_Reset_Level_Func = n end
+	end)
+
+	CreateDropdown(StatsPage, "\u{1F504}  Stat to Reset", "\u{E40}\u{E25}\u{E37}\u{E2D}\u{E01} Stat \u{E17}\u{E35}\u{E48}\u{E08}\u{E30}\u{E23}\u{E35}\u{E40}\u{E0B}\u{E47}\u{E15}",
+	{"Melee","Defense","Blox Fruit","Sword","Gun","All"}, "Melee",
+	function(v)
+		if v == "All" then
+			Auto_Stat_Reset_Stats_Func = {"Melee","Defense","Blox Fruit","Sword","Gun"}
+		else
+			Auto_Stat_Reset_Stats_Func = {v}
+		end
+	end)
+
+	local resetStatusRow, resetDot, resetLbl = CreateStatusRow(StatsPage, "Auto Reset:  IDLE")
+
+	task.spawn(function()
+	local _lastResetLevel = -1
+	while true do task.wait(1)
+	if Auto_Stat_Reset_Func then
+		pcall(function()
+			local currentLevel = Data.Level.Value
+			local maxLevel     = GameData.MaxLevel
+			local targetLevel  = (Auto_Stat_Reset_Level_Func == 0) and maxLevel or Auto_Stat_Reset_Level_Func
+
+			if currentLevel >= targetLevel and _lastResetLevel ~= targetLevel then
+				resetLbl.Text = "Auto Reset:  RESETTING..."; resetLbl.TextColor3 = Color3.fromRGB(255,200,0)
+				resetDot.BackgroundColor3 = Color3.fromRGB(255,200,0)
+
+				pcall(function() CommF:InvokeServer("BuyStatRefund") end)
+				task.wait(0.5)
+
+				for _, statName in ipairs(Auto_Stat_Reset_Stats_Func) do
+					pcall(function() CommF:InvokeServer("StatReset", statName) end)
+					task.wait(0.3)
+				end
+
+				_lastResetLevel = targetLevel
+				resetLbl.Text = "Auto Reset:  DONE \u{2713}"; resetLbl.TextColor3 = Color3.fromRGB(0,220,120)
+				resetDot.BackgroundColor3 = Color3.fromRGB(0,220,120)
+
+			elseif currentLevel < targetLevel then
+				_lastResetLevel = -1
+				resetLbl.Text = "Auto Reset:  WAITING Lv."..targetLevel; resetLbl.TextColor3 = Theme.SubText
+				resetDot.BackgroundColor3 = Color3.fromRGB(70,70,80)
+			end
+		end)
+	else
+		resetLbl.Text = "Auto Reset:  IDLE"; resetLbl.TextColor3 = Theme.SubText
+		resetDot.BackgroundColor3 = Color3.fromRGB(70,70,80)
+	end
+	end
+	end)
 
 	local function makeStatLabel(p, txt)
 		local l = Instance.new("TextLabel", p)
@@ -6431,6 +6536,328 @@ task.spawn(function()
 
 				FlyTo(CFrameElite)
 			end)
+		end
+	end
+end)
+
+-- ===== ANTI-KICK (Anti-Cheat Bypass) =====
+
+pcall(function()
+	local oldNamecall
+	oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+		local method = getnamecallmethod()
+		if Anti_Kick_Func and method == "Kick" and self == Player then
+			local reason = tostring(select(1, ...) or "")
+			if not reason:find("Key") then
+				warn("[KYX] Anti-Kick blocked: " .. reason)
+				return
+			end
+		end
+		return oldNamecall(self, ...)
+	end)
+end)
+
+-- ===== AUTO RE-DISTRIBUTE STATS หลัง RESET =====
+
+Auto_ReDistribute_After_Reset = true
+
+-- Server Hop flags
+Auto_Hop_No_Fruit_Func  = false
+Auto_Hop_No_Boss_Func   = false
+Auto_Hop_Timeout        = 30    -- วินาทีที่รอก่อน hop
+
+-- Flower / Material collect flags
+Auto_Collect_Flower_Func   = false
+Auto_Collect_Material_Func = false
+
+-- Auto Mastery All Weapons flag
+Auto_Mastery_All_Func      = false
+Mastery_All_Current_Type   = "Melee"   -- tracking ว่าตอนนี้ farm อะไรอยู่
+
+task.spawn(function()
+	local _wasReset = false
+	while true do
+		task.wait(1)
+		pcall(function()
+			if not Auto_Stat_Reset_Func then _wasReset = false; return end
+			if not Auto_ReDistribute_After_Reset then return end
+
+			local currentLevel = Data.Level.Value
+			local maxLevel     = GameData.MaxLevel
+			local targetLevel  = (Auto_Stat_Reset_Level_Func == 0) and maxLevel or Auto_Stat_Reset_Level_Func
+
+			if currentLevel < targetLevel then
+				_wasReset = true
+			end
+
+			-- ถ้าเพิ่ง reset และมี points ให้ใส่ stats ทันที
+			if _wasReset and Data.Points.Value > 0 and #Stats_Listed_Func > 0 then
+				CommF:InvokeServer("Stat", Stats_Listed_Func, Data.Points.Value)
+				task.wait(0.5)
+			end
+
+			if currentLevel >= targetLevel then
+				_wasReset = false
+			end
+		end)
+	end
+end)
+
+-- ===== RACE V4 / AWAKENING QUEST =====
+
+local RaceV4Data = {
+	["Human"]  = { trialCF = CFrame.new(-1967, 48, -1405), trialRemote = "TrialRaceHuman",  trainRemote = "TrainRaceHuman"  },
+	["Shark"]  = { trialCF = CFrame.new(61060,  6,  1267), trialRemote = "TrialRaceShark",  trainRemote = "TrainRaceShark"  },
+	["Sky"]    = { trialCF = CFrame.new(-7862, 5544, -379), trialRemote = "TrialRaceSky",    trainRemote = "TrainRaceSky"    },
+	["Angel"]  = { trialCF = CFrame.new(-7862, 5544, -379), trialRemote = "TrialRaceAngel",  trainRemote = "TrainRaceAngel"  },
+	["Cyborg"] = { trialCF = CFrame.new( 6094,   74, 3826), trialRemote = "TrialRaceCyborg", trainRemote = "TrainRaceCyborg" },
+}
+
+-- Teleport to Race Door
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		if Teleport_Race_Door_Func then
+			pcall(function()
+				local d = RaceV4Data[tostring(Data.Race.Value)]
+				if d then FlyTo(d.trialCF) end
+			end)
+		end
+	end
+end)
+
+-- Auto Trial Race
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if Auto_Trial_Race_Func then
+			pcall(function()
+				local d = RaceV4Data[tostring(Data.Race.Value)]
+				if not d then return end
+				FlyTo(d.trialCF)
+				task.wait(0.5)
+				local result = CommF:InvokeServer(d.trialRemote, "Start")
+				if result then
+					task.wait(1)
+					CommF:InvokeServer(d.trialRemote, "Enter")
+					task.wait(3)
+				end
+			end)
+		end
+	end
+end)
+
+-- Auto Train Race
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if Auto_Train_Race_Func then
+			pcall(function()
+				local d = RaceV4Data[tostring(Data.Race.Value)]
+				if not d then return end
+				FlyTo(d.trialCF)
+				task.wait(0.5)
+				CommF:InvokeServer(d.trainRemote, "Complete")
+				task.wait(2)
+			end)
+		end
+	end
+end)
+
+-- ===== SERVER HOP เมื่อไม่เจอ Fruit / Boss =====
+
+task.spawn(function()
+	local _noFruitTimer = 0
+	local _noBossTimer  = 0
+	while true do
+		task.wait(1)
+		pcall(function()
+
+			-- ── Hop เมื่อไม่เจอ Fruit ──
+			if Auto_Hop_No_Fruit_Func then
+				local foundFruit = false
+				local CS = game:GetService("CollectionService")
+				if #CS:GetTagged("Fruit") > 0 then foundFruit = true end
+				if not foundFruit then
+					for _, obj in ipairs(workspace:GetDescendants()) do
+						if obj:IsA("BasePart") and obj.Name:lower():find("fruit") then
+							foundFruit = true; break
+						end
+					end
+				end
+				if not foundFruit then
+					_noFruitTimer += 1
+					if _noFruitTimer >= Auto_Hop_Timeout then
+						_noFruitTimer = 0
+						warn("[KYX] ไม่เจอ Fruit " .. Auto_Hop_Timeout .. "s → Hop")
+						HopServer()
+					end
+				else
+					_noFruitTimer = 0
+				end
+			else
+				_noFruitTimer = 0
+			end
+
+			-- ── Hop เมื่อไม่เจอ Boss ──
+			if Auto_Hop_No_Boss_Func and Selected_Boss then
+				local foundBoss = false
+				for _, v in ipairs(Enemies:GetChildren()) do
+					if v.Name == (NameBoss or Selected_Boss) and IsAlive(v) then
+						foundBoss = true; break
+					end
+				end
+				if not foundBoss then
+					local obj = game.ReplicatedStorage:FindFirstChild(Selected_Boss)
+					if obj and obj:FindFirstChild("HumanoidRootPart") then foundBoss = true end
+				end
+				if not foundBoss then
+					_noBossTimer += 1
+					if _noBossTimer >= Auto_Hop_Timeout then
+						_noBossTimer = 0
+						warn("[KYX] ไม่เจอ Boss '" .. tostring(Selected_Boss) .. "' → Hop")
+						HopServer()
+					end
+				else
+					_noBossTimer = 0
+				end
+			else
+				_noBossTimer = 0
+			end
+
+		end)
+	end
+end)
+
+-- ===== AUTO COLLECT FLOWER / MATERIAL =====
+
+local _FlowerTags   = {"Flower","FlowerItem","FlowerPickup","BlueFlower","RedFlower","YellowFlower"}
+local _MaterialTags = {"MaterialDrop","Material","MaterialItem","ChestDrop"}
+
+local function GetNearbyCollectibles()
+	local list = {}
+	local CS = game:GetService("CollectionService")
+	local tags = {}
+	if Auto_Collect_Flower_Func   then for _, t in ipairs(_FlowerTags)   do table.insert(tags, t) end end
+	if Auto_Collect_Material_Func then for _, t in ipairs(_MaterialTags)  do table.insert(tags, t) end end
+	for _, tag in ipairs(tags) do
+		for _, obj in ipairs(CS:GetTagged(tag)) do
+			table.insert(list, obj)
+		end
+	end
+	-- fallback scan
+	if #list == 0 and (Auto_Collect_Flower_Func or Auto_Collect_Material_Func) then
+		for _, obj in ipairs(workspace:GetDescendants()) do
+			if obj:IsA("BasePart") then
+				local n = obj.Name:lower()
+				if (Auto_Collect_Flower_Func and (n:find("flower") or n:find("petal")))
+				or (Auto_Collect_Material_Func and n:find("material")) then
+					table.insert(list, obj)
+				end
+			end
+		end
+	end
+	return list
+end
+
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		if Auto_Collect_Flower_Func or Auto_Collect_Material_Func then
+			pcall(function()
+				local char = Player.Character
+				if not char then return end
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if not hrp then return end
+
+				local items = GetNearbyCollectibles()
+				if #items == 0 then return end
+
+				-- หาชิ้นที่ใกล้ที่สุด
+				local closest, closestDist = nil, math.huge
+				for _, obj in ipairs(items) do
+					local part = obj:IsA("BasePart") and obj
+					          or (obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")))
+					if part then
+						local d = (hrp.Position - part.Position).Magnitude
+						if d < closestDist then
+							closestDist = d
+							closest = part
+						end
+					end
+				end
+
+				if closest and closestDist < 600 then
+					FlyTo(closest.CFrame * CFrame.new(0, 2, 0))
+					task.wait(0.2)
+					local root = closest.Parent or closest
+					for _, pp in ipairs(root:GetDescendants()) do
+						if pp:IsA("ProximityPrompt") then
+							pcall(fireproximityprompt, pp)
+						elseif pp:IsA("ClickDetector") then
+							pcall(fireclickdetector, pp)
+						end
+					end
+				end
+			end)
+		end
+	end
+end)
+
+-- ===== AUTO MASTERY ALL WEAPONS =====
+
+local _MasterySequence = {"Melee", "Sword", "Gun", "Blox Fruits"}
+local _MasteryIdx      = 1
+local _MaxMastery      = 600
+
+local function GetMasteryVal(typeName)
+	local ok, val = pcall(function()
+		local map = {
+			["Melee"]       = Data.Stats.Melee["Level"].Value,
+			["Sword"]       = Data.Stats.Sword["Level"].Value,
+			["Gun"]         = Data.Stats.Gun["Level"].Value,
+			["Blox Fruits"] = Data.Stats["Demon Fruit"]["Level"].Value,
+		}
+		return map[typeName] or 0
+	end)
+	return ok and val or 0
+end
+
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if Auto_Mastery_All_Func then
+			pcall(function()
+				local weaponType = _MasterySequence[_MasteryIdx]
+				local current    = GetMasteryVal(weaponType)
+
+				-- type นี้เต็มแล้ว → ไป type ถัดไป
+				if current >= _MaxMastery then
+					_MasteryIdx = (_MasteryIdx % #_MasterySequence) + 1
+					local next = _MasterySequence[_MasteryIdx]
+					-- ถ้าวนครบ 4 type ทั้งหมดเต็มหมด → ปิด
+					if GetMasteryVal(next) >= _MaxMastery then
+						Auto_Mastery_All_Func = false
+						Mastery_Farming_Func  = false
+						warn("[KYX] Mastery ทุก Weapon เต็มหมดแล้ว!")
+					end
+					return
+				end
+
+				Mastery_All_Current_Type = weaponType
+				Selected_Type_Mastery    = weaponType
+				Mastery_Farming_Func     = true
+
+				-- equip weapon ให้ตรง type
+				local equipName = (weaponType == "Blox Fruits") and "Blox Fruit" or weaponType
+				EquipTool(equipName)
+			end)
+		else
+			if Mastery_Farming_Func and Mastery_All_Current_Type then
+				-- Auto Mastery All ปิด → หยุด mastery farm ด้วย
+				Mastery_Farming_Func     = false
+				Mastery_All_Current_Type = nil
+			end
 		end
 	end
 end)
