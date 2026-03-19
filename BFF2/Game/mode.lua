@@ -12,8 +12,6 @@
   toSeconds()                บรรทัด 252
   checkKey()                 บรรทัด 256
 
-─── KYXLIB UI LIBRARY  บรรทัด 2850
-
 ─── MODE: ONECLICK  (บรรทัด 205) ────────────────────────────────────
   formatNumber()             บรรทัด 217
   Block Other Script UI      บรรทัด 222
@@ -122,7 +120,7 @@
   ShowUpdateLog()            บรรทัด 2600
 
   ── GUI BUILDER ────────────────────────────────────────────────
-  BuildGUI()                 บรรทัด 3825
+  BuildGUI()                 บรรทัด 2728
   ├─ CreateTab()             บรรทัด 2810
   ├─ CreateToggle()          บรรทัด 2893
   ├─ CreateSectionHeader()   บรรทัด 2963
@@ -217,7 +215,7 @@
   Auto Collect Flower/Mat    บรรทัด 6732
   Auto Mastery All Weapons   บรรทัด 6807
 
-  BuildGUI()  ← เรียกใช้ที่    บรรทัด 7487
+  BuildGUI()  ← เรียกใช้ที่    บรรทัด 6861
 
 ]]
 
@@ -492,8 +490,6 @@ if getgenv().mode == "Oneclick" then
 
 
 elseif getgenv().mode == "normal" then
-
-
 
 	-- ===== ตรวจสอบ Key ก่อนโหลด (Normal Mode) =====
 	do
@@ -2850,985 +2846,37 @@ end
 -- ────────────────────────────────────────────────────────
 
 -- แยก GUI ออกเป็น function เพื่อลด local scope หลักไม่เกิน 200
--- ============================================================
--- ===== KYXLIB — UI COMPONENT LIBRARY (Fluent-style) =====
--- ============================================================
---[[
-  KyxLib.new(screenGui)  → Window
-  Window:Tab(name, icon) → Tab
-  Tab:Section(text)
-  Tab:Toggle(opts)       → { SetValue, GetValue }
-  Tab:Button(opts)
-  Tab:Dropdown(opts)     → { SetValue, GetValue }
-  Tab:Input(opts)        → { GetValue }
-  Tab:Label(text)
-  Tab:Status(text)       → { SetText, SetDot }
-  Tab:Divider()
-  Tab:Keybind(opts)      → { GetValue }
-  Tab:ColorPicker(opts)  → { GetValue }
-  Tab:Slider(opts)       → { SetValue, GetValue }
-]]
-
-local KyxLib = {}
-KyxLib.__index = KyxLib
-
--- ── Theme ────────────────────────────────────────────────────
-KyxLib.Theme = {
-	BG          = Color3.fromRGB(8,   8,  16),
-	BG2         = Color3.fromRGB(13,  12, 24),
-	BG3         = Color3.fromRGB(18,  16, 32),
-	TopBar      = Color3.fromRGB(12,  10, 22),
-	Accent      = Color3.fromRGB(140,100,255),
-	AccentDark  = Color3.fromRGB( 80, 50,180),
-	AccentGlow  = Color3.fromRGB(100, 60,220),
-	Text        = Color3.fromRGB(225,220,245),
-	SubText     = Color3.fromRGB(110,100,150),
-	Border      = Color3.fromRGB(100, 70,200),
-	ToggleON    = Color3.fromRGB(120, 80,240),
-	ToggleOFF   = Color3.fromRGB( 35, 33, 55),
-	ToggleBall  = Color3.fromRGB(240,235,255),
-	BtnBG       = Color3.fromRGB( 20, 16, 40),
-	BtnHover    = Color3.fromRGB( 30, 22, 56),
-	BtnActive   = Color3.fromRGB( 12,  9, 24),
-	DangerBG    = Color3.fromRGB( 35, 18, 18),
-	DangerText  = Color3.fromRGB(210, 70, 70),
-	DropBG      = Color3.fromRGB( 12, 11, 22),
-	DropItem    = Color3.fromRGB( 18, 17, 30),
-	DropHover   = Color3.fromRGB( 32, 28, 52),
-	SliderFill  = Color3.fromRGB(120, 80,240),
-	SliderBG    = Color3.fromRGB( 35, 33, 55),
-	Success     = Color3.fromRGB(  0,220,120),
-	Warning     = Color3.fromRGB(255,140, 30),
-	Error       = Color3.fromRGB(255, 70, 70),
-}
-
--- ── Helpers ──────────────────────────────────────────────────
-local TS      = game:GetService("TweenService")
-local UIS     = game:GetService("UserInputService")
-
-local function Tween(obj, props, t, style, dir)
-	return TS:Create(obj,
-		TweenInfo.new(t or 0.18,
-			style or Enum.EasingStyle.Quart,
-			dir   or Enum.EasingDirection.Out),
-		props)
-end
-
-local function Make(cls, props, parent)
-	local obj = Instance.new(cls)
-	for k, v in pairs(props or {}) do
-		if k ~= "Parent" then obj[k] = v end
-	end
-	if parent then obj.Parent = parent end
-	return obj
-end
-
-local function Corner(r, parent)
-	return Make("UICorner", {CornerRadius = UDim.new(0, r)}, parent)
-end
-
-local function Stroke(color, thick, transp, parent)
-	return Make("UIStroke", {
-		Color = color, Thickness = thick or 1,
-		Transparency = transp or 0,
-	}, parent)
-end
-
-local function GradientH(colors, parent)
-	local kps = {}
-	for i, c in ipairs(colors) do
-		table.insert(kps, ColorSequenceKeypoint.new((i-1)/(#colors-1), c))
-	end
-	return Make("UIGradient", {Color = ColorSequence.new(kps)}, parent)
-end
-
--- ── Window ───────────────────────────────────────────────────
-function KyxLib.new(screenGui, opts)
-	opts = opts or {}
-	local T   = KyxLib.Theme
-	local self = setmetatable({}, KyxLib)
-
-	self._gui   = screenGui
-	self._tabs  = {}
-	self._conns = {}
-	self._state = {visible=true, minimized=false}
-	self._size  = opts.size or UDim2.new(0,680,0,520)
-	self._minSz = UDim2.new(0,44,0,44)
-
-	-- ── Main Frame ──────────────────────────────────────────
-	local main = Make("Frame", {
-		Name             = "KyxMain",
-		Size             = UDim2.new(0,680,0,0),
-		Position         = opts.position or UDim2.new(0.5,-340,0.5,-260),
-		BackgroundColor3 = T.BG,
-		BackgroundTransparency = 1,
-		BorderSizePixel  = 0,
-		ClipsDescendants = true,
-	}, screenGui)
-	Corner(18, main)
-	local mainStroke = Stroke(T.AccentGlow, 1.5, 0.55, main)
-	-- subtle inner gradient
-	local mainGrad = Make("UIGradient", {
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0,   Color3.fromRGB(14,12,28)),
-			ColorSequenceKeypoint.new(1,   Color3.fromRGB( 7, 6,14)),
-		}),
-		Rotation = 100,
-	}, main)
-	self._main      = main
-	self._mainStroke= mainStroke
-
-	-- ── Title Bar ───────────────────────────────────────────
-	local topBar = Make("Frame", {
-		Size             = UDim2.new(1,0,0,48),
-		BackgroundColor3 = T.TopBar,
-		BorderSizePixel  = 0,
-		ZIndex           = 2,
-	}, main)
-	Corner(18, topBar)
-	-- fix bottom corners
-	Make("Frame", {
-		Size = UDim2.new(1,0,0,14), Position = UDim2.new(0,0,1,-14),
-		BackgroundColor3 = T.TopBar, BorderSizePixel = 0, ZIndex = 2,
-	}, topBar)
-	-- accent line
-	local accLine = Make("Frame", {
-		Size = UDim2.new(1,0,0,1), Position = UDim2.new(0,0,1,0),
-		BackgroundColor3 = T.Accent, BorderSizePixel = 0, ZIndex = 3,
-	}, topBar)
-	GradientH({
-		Color3.fromRGB(8,8,16),
-		T.AccentGlow, Color3.fromRGB(160,100,255),
-		Color3.fromRGB(80,180,255), Color3.fromRGB(8,8,16),
-	}, accLine)
-	-- dot
-	local dot = Make("Frame", {
-		Size = UDim2.new(0,7,0,7), Position = UDim2.new(0,16,0.5,-3.5),
-		BackgroundColor3 = Color3.fromRGB(160,100,255), BorderSizePixel = 0, ZIndex = 3,
-	}, topBar)
-	Corner(99, dot)
-	Stroke(Color3.fromRGB(200,150,255), 2, 0.3, dot)
-	-- title
-	local titleLbl = Make("TextLabel", {
-		Text = opts.title or "KYX HUB",
-		Size = UDim2.new(0,160,0,18), Position = UDim2.new(0,28,0,8),
-		BackgroundTransparency = 1, TextColor3 = T.Text,
-		Font = Enum.Font.GothamBlack, TextSize = 13,
-		TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 3,
-	}, topBar)
-	GradientH({
-		Color3.fromRGB(200,170,255),
-		Color3.fromRGB(130, 90,255),
-		Color3.fromRGB( 80,180,255),
-	}, titleLbl)
-	-- subtitle
-	local subLbl = Make("TextLabel", {
-		Text = opts.subtitle or "v16.7",
-		Size = UDim2.new(0,200,0,13), Position = UDim2.new(0,28,0,24),
-		BackgroundTransparency = 1, TextColor3 = T.SubText,
-		Font = Enum.Font.Gotham, TextSize = 9,
-		TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 3,
-	}, topBar)
-	-- key label
-	local keyLbl = Make("TextLabel", {
-		Text = "🔑 กำลังตรวจสอบ...",
-		Size = UDim2.new(0,280,0,11), Position = UDim2.new(0,28,0,36),
-		BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(120,200,100),
-		Font = Enum.Font.Gotham, TextSize = 9,
-		TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 3,
-	}, topBar)
-	self._keyLabel = keyLbl
-
-	-- ── Minimize Button ─────────────────────────────────────
-	local minBtn = Make("TextButton", {
-		Text = "−", Size = UDim2.new(0,28,0,28),
-		Position = UDim2.new(1,-68,0.5,-14),
-		BackgroundColor3 = Color3.fromRGB(28,22,48),
-		TextColor3 = T.Accent, Font = Enum.Font.GothamBold,
-		TextSize = 16, BorderSizePixel = 0, ZIndex = 4,
-	}, topBar)
-	Corner(7, minBtn)
-	Stroke(T.Accent, 1, 0.6, minBtn)
-	self._minBtn = minBtn
-
-	-- ── Close Button ────────────────────────────────────────
-	local closeBtn = Make("TextButton", {
-		Text = "✕", Size = UDim2.new(0,28,0,28),
-		Position = UDim2.new(1,-34,0.5,-14),
-		BackgroundColor3 = T.DangerBG,
-		TextColor3 = T.DangerText, Font = Enum.Font.GothamBold,
-		TextSize = 11, BorderSizePixel = 0, ZIndex = 4,
-	}, topBar)
-	Corner(7, closeBtn)
-	Stroke(Color3.fromRGB(180,50,50), 1, 0.5, closeBtn)
-	self._closeBtn = closeBtn
-
-	-- ── Content ─────────────────────────────────────────────
-	local content = Make("Frame", {
-		Name = "Content",
-		Size = UDim2.new(1,0,1,-50), Position = UDim2.new(0,0,0,50),
-		BackgroundTransparency = 1, ClipsDescendants = true,
-	}, main)
-	self._content = content
-
-	-- ── Tab Sidebar ─────────────────────────────────────────
-	local sideOuter = Make("Frame", {
-		Size = UDim2.new(0,116,1,-12), Position = UDim2.new(0,7,0,6),
-		BackgroundColor3 = Color3.fromRGB(11,10,18),
-		BorderSizePixel = 0, ClipsDescendants = true,
-	}, content)
-	Corner(14, sideOuter)
-	Stroke(Color3.fromRGB(100,80,220), 1, 0.65, sideOuter)
-	Make("UIGradient", {
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(18,15,30)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 9,18)),
-		}),
-		Rotation = 90,
-	}, sideOuter)
-
-	local sidebar = Make("ScrollingFrame", {
-		Size = UDim2.new(1,0,1,0),
-		BackgroundTransparency = 1, BorderSizePixel = 0,
-		ScrollBarThickness = 0,
-		ScrollingDirection = Enum.ScrollingDirection.Y,
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		CanvasSize = UDim2.new(0,0,0,0),
-	}, sideOuter)
-	Make("UIListLayout", {
-		Padding = UDim.new(0,3),
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-	}, sidebar)
-	Make("UIPadding", {
-		PaddingTop = UDim.new(0,10), PaddingBottom = UDim.new(0,10),
-		PaddingLeft = UDim.new(0,6),  PaddingRight  = UDim.new(0,6),
-	}, sidebar)
-	self._sidebar   = sidebar
-	self._topBar    = topBar
-	self._accLine   = accLine
-	self._dot       = dot
-
-	-- ── Panel ───────────────────────────────────────────────
-	local panel = Make("Frame", {
-		Name = "Panel",
-		Size = UDim2.new(1,-134,1,-12), Position = UDim2.new(0,127,0,6),
-		BackgroundColor3 = Color3.fromRGB(11,10,20), BorderSizePixel = 0,
-	}, content)
-	Corner(14, panel)
-	Stroke(Color3.fromRGB(90,60,180), 1, 0.7, panel)
-	local panelInner = Make("Frame", {
-		Size = UDim2.new(1,-4,1,-4), Position = UDim2.new(0,2,0,2),
-		BackgroundTransparency = 1, ClipsDescendants = true,
-	}, panel)
-	self._panelInner = panelInner
-	self._activeTab  = nil
-
-	-- ── Dropdown Overlay ────────────────────────────────────
-	local dropOverlay = Make("Frame", {
-		Size = UDim2.new(1,0,1,0),
-		BackgroundTransparency = 1, BorderSizePixel = 0,
-		ZIndex = 50, Visible = false,
-	}, screenGui)
-	self._dropOverlay  = dropOverlay
-	self._activeDropdown = nil
-
-	dropOverlay.InputBegan:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			self:_closeDropdown()
-		end
-	end)
-
-	-- ── Window Behaviour ────────────────────────────────────
-	self:_bindControls(main, topBar, minBtn, closeBtn, content)
-	self:_openAnim(main, accLine, dot, mainStroke)
-
-	-- key label update
-	task.spawn(function()
-		while true do
-			local ok, msg = checkKey()
-			keyLbl.Text = "🔑 " .. msg
-			keyLbl.TextColor3 = ok
-				and Color3.fromRGB(120,200,100)
-				or  Color3.fromRGB(200,60,60)
-			task.wait(60)
-		end
-	end)
-
-	return self
-end
-
--- ── Internal: dropdown close ─────────────────────────────────
-function KyxLib:_closeDropdown()
-	if self._activeDropdown then
-		self._activeDropdown:Destroy()
-		self._activeDropdown = nil
-	end
-	self._dropOverlay.Visible = false
-end
-
--- ── Internal: window controls ────────────────────────────────
-function KyxLib:_bindControls(main, topBar, minBtn, closeBtn, content)
-	local T    = KyxLib.Theme
-	local drag = {on=false, start=nil, pos=nil}
-
-	-- close
-	closeBtn.MouseButton1Click:Connect(function()
-		for _, c in pairs(self._conns) do pcall(function() c:Disconnect() end) end
-		main:Destroy()
-	end)
-	closeBtn.MouseEnter:Connect(function()
-		Tween(closeBtn, {BackgroundColor3 = Color3.fromRGB(60,20,20)}):Play()
-	end)
-	closeBtn.MouseLeave:Connect(function()
-		Tween(closeBtn, {BackgroundColor3 = T.DangerBG}):Play()
-	end)
-
-	-- minimize
-	minBtn.MouseButton1Click:Connect(function()
-		self._state.minimized = not self._state.minimized
-		if self._state.minimized then
-			content.Visible = false
-			Tween(main, {Size = self._minSz}, 0.28, Enum.EasingStyle.Quart):Play()
-			minBtn.Text = "+"
-			Tween(minBtn, {Position = UDim2.new(0.5,-14,0.5,-14)}, 0.2):Play()
-			closeBtn.Visible = false
-		else
-			content.Visible = true
-			closeBtn.Visible = true
-			Tween(minBtn, {Position = UDim2.new(1,-68,0.5,-14)}, 0.2):Play()
-			Tween(main, {Size = self._size}, 0.32, Enum.EasingStyle.Back):Play()
-			minBtn.Text = "−"
-		end
-	end)
-
-	-- drag
-	table.insert(self._conns, topBar.InputBegan:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			drag.on    = true
-			drag.start = inp.Position
-			drag.pos   = main.Position
-		end
-	end))
-	table.insert(self._conns, UIS.InputChanged:Connect(function(inp)
-		if drag.on and inp.UserInputType == Enum.UserInputType.MouseMovement then
-			local d = inp.Position - drag.start
-			main.Position = UDim2.new(
-				drag.pos.X.Scale, drag.pos.X.Offset + d.X,
-				drag.pos.Y.Scale, drag.pos.Y.Offset + d.Y)
-		end
-	end))
-	table.insert(self._conns, UIS.InputEnded:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			drag.on = false
-		end
-	end))
-	-- INSERT toggle
-	table.insert(self._conns, UIS.InputBegan:Connect(function(inp, processed)
-		if not processed and inp.KeyCode == Enum.KeyCode.Insert then
-			self._state.visible = not self._state.visible
-			if self._state.visible then
-				main.Visible = true
-				Tween(main, {BackgroundTransparency=0,
-					Size = self._state.minimized and self._minSz or self._size},
-					0.3, Enum.EasingStyle.Back):Play()
-			else
-				Tween(main, {BackgroundTransparency=1}, 0.2, Enum.EasingStyle.Quad):Play()
-				task.delay(0.22, function() main.Visible = false end)
-			end
-		end
-	end))
-end
-
--- ── Internal: open animation ─────────────────────────────────
-function KyxLib:_openAnim(main, accLine, dot, stroke)
-	main.Visible = true
-	task.wait(0.08)
-	Tween(main, {Size=self._size, BackgroundTransparency=0}, 0.45, Enum.EasingStyle.Back):Play()
-	task.delay(0.5,  function() Tween(accLine, {BackgroundTransparency=0.6}, 0.4, Enum.EasingStyle.Sine):Play() end)
-	task.delay(0.65, function() Tween(dot, {BackgroundTransparency=0.4}, 0.5, Enum.EasingStyle.Sine):Play() end)
-	task.delay(0.75, function() Tween(stroke, {Transparency=0.3}, 0.8, Enum.EasingStyle.Sine):Play() end)
-end
-
--- ── Tab ──────────────────────────────────────────────────────
-function KyxLib:Tab(name, icon)
-	local T    = KyxLib.Theme
-	local disp = (icon and icon .. "  " or "") .. (T_key and T(name) or name)
-
-	-- sidebar button
-	local btn = Make("TextButton", {
-		Text = disp, Size = UDim2.new(1,0,0,34),
-		BackgroundColor3 = Color3.fromRGB(14,12,24),
-		TextColor3 = T.SubText, Font = Enum.Font.GothamBold,
-		TextSize = 11, BorderSizePixel = 0,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		AutoButtonColor = false, ZIndex = 2,
-	}, self._sidebar)
-	Corner(10, btn)
-	Make("UIPadding", {PaddingLeft = UDim.new(0,10)}, btn)
-
-	-- active indicator bar
-	local indicator = Make("Frame", {
-		Size = UDim2.new(0,3,0,18), Position = UDim2.new(0,0,0.5,-9),
-		BackgroundColor3 = T.Accent, BorderSizePixel = 0,
-		BackgroundTransparency = 1, ZIndex = 3,
-	}, btn)
-	Corner(99, indicator)
-
-	-- active glow bg
-	local glowBG = Make("Frame", {
-		Size = UDim2.new(1,0,1,0),
-		BackgroundColor3 = T.Accent, BackgroundTransparency = 1,
-		BorderSizePixel = 0, ZIndex = 0,
-	}, btn)
-	Corner(10, glowBG)
-	local glowStroke = Stroke(T.Accent, 1, 1, glowBG)
-
-	-- page scroll
-	local page = Make("ScrollingFrame", {
-		Name = "Page_"..name,
-		Size = UDim2.new(1,0,1,0),
-		BackgroundTransparency = 1, BorderSizePixel = 0,
-		Visible = false, ScrollBarThickness = 3,
-		ScrollBarImageColor3 = T.Accent,
-		ScrollingDirection = Enum.ScrollingDirection.Y,
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		CanvasSize = UDim2.new(0,0,0,0),
-	}, self._panelInner)
-	Make("UIListLayout", {
-		Padding = UDim.new(0,5),
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-	}, page)
-	Make("UIPadding", {
-		PaddingTop    = UDim.new(0,8),  PaddingBottom = UDim.new(0,12),
-		PaddingLeft   = UDim.new(0,8),  PaddingRight  = UDim.new(0,8),
-	}, page)
-
-	local tabData = {btn=btn, page=page, indicator=indicator, glowBG=glowBG, glowStroke=glowStroke}
-	table.insert(self._tabs, tabData)
-
-	-- hover
-	btn.MouseEnter:Connect(function()
-		if self._activeTab ~= tabData then
-			Tween(btn, {BackgroundColor3=Color3.fromRGB(22,18,40)}, 0.12):Play()
-		end
-	end)
-	btn.MouseLeave:Connect(function()
-		if self._activeTab ~= tabData then
-			Tween(btn, {BackgroundColor3=Color3.fromRGB(14,12,24)}, 0.12):Play()
-		end
-	end)
-
-	-- click → switch
-	btn.MouseButton1Click:Connect(function()
-		self:_selectTab(tabData)
-	end)
-
-	-- auto-select first tab
-	if #self._tabs == 1 then
-		task.defer(function() self:_selectTab(tabData) end)
-	end
-
-	-- return Tab API
-	local TabAPI = {_page = page, _lib = self}
-	setmetatable(TabAPI, {__index = KyxLib._TabMethods})
-	return TabAPI
-end
-
-function KyxLib:_selectTab(tabData)
-	local T = KyxLib.Theme
-	-- deactivate all
-	for _, t in ipairs(self._tabs) do
-		Tween(t.btn, {BackgroundColor3=Color3.fromRGB(14,12,24), TextColor3=T.SubText}, 0.18):Play()
-		t.page.Visible = false
-		Tween(t.indicator, {BackgroundTransparency=1}, 0.18):Play()
-		Tween(t.glowBG, {BackgroundTransparency=1}, 0.18):Play()
-		Tween(t.glowStroke, {Transparency=1}, 0.18):Play()
-	end
-	-- activate
-	Tween(tabData.btn, {
-		BackgroundColor3 = Color3.fromRGB(28,20,55),
-		TextColor3 = Color3.fromRGB(200,170,255),
-	}, 0.22, Enum.EasingStyle.Quart):Play()
-	Tween(tabData.indicator, {BackgroundTransparency=0}, 0.25, Enum.EasingStyle.Back):Play()
-	Tween(tabData.glowBG, {BackgroundTransparency=0.88}, 0.22):Play()
-	Tween(tabData.glowStroke, {Transparency=0.65}, 0.22):Play()
-	tabData.page.Visible = true
-	tabData.page.Position = UDim2.new(0.04,0,0,0)
-	tabData.page:TweenPosition(UDim2.new(0,0,0,0),
-		Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.18, true)
-	self._activeTab = tabData
-end
-
--- ── Tab Methods ───────────────────────────────────────────────
-KyxLib._TabMethods = {}
-
--- Section header
-function KyxLib._TabMethods:Section(text)
-	local T   = KyxLib.Theme
-	local hdr = Make("Frame", {
-		Size = UDim2.new(1,0,0,20),
-		BackgroundTransparency = 1,
-	}, self._page)
-	local line = Make("Frame", {
-		Size = UDim2.new(1,0,0,1), Position = UDim2.new(0,0,0.5,0),
-		BackgroundColor3 = T.Accent, BackgroundTransparency = 0.82,
-		BorderSizePixel = 0,
-	}, hdr)
-	local lbl = Make("TextLabel", {
-		Text = "  " .. (T_key and T(text) or text) .. "  ",
-		Size = UDim2.new(0,0,1,0), AutomaticSize = Enum.AutomaticSize.X,
-		Position = UDim2.new(0,8,0,0),
-		BackgroundColor3 = Color3.fromRGB(11,10,20),
-		TextColor3 = T.Accent, Font = Enum.Font.GothamBold,
-		TextSize = 9, ZIndex = 2,
-	}, hdr)
-	return hdr
-end
-
--- Divider
-function KyxLib._TabMethods:Divider()
-	local T = KyxLib.Theme
-	Make("Frame", {
-		Size = UDim2.new(1,0,0,1),
-		BackgroundColor3 = T.Border, BackgroundTransparency = 0.75,
-		BorderSizePixel = 0,
-	}, self._page)
-end
-
--- Toggle
-function KyxLib._TabMethods:Toggle(opts)
-	-- opts: { label, desc, default, callback }
-	local T       = KyxLib.Theme
-	local lib     = self._lib
-	local label   = opts.label or "Toggle"
-	local desc    = opts.desc
-	local saved   = _Config[label]
-	local isOn    = (saved ~= nil) and saved or (opts.default == true)
-	if saved ~= nil and opts.callback then
-		pcall(opts.callback, isOn)
-	end
-
-	local row = Make("Frame", {
-		Size = UDim2.new(1,0,0, desc and 46 or 38),
-		BackgroundColor3 = T.BG2, BorderSizePixel = 0,
-	}, self._page)
-	Corner(10, row)
-	local rowStroke = Stroke(T.Border, 1, 0.88, row)
-
-	-- label
-	local lbl = Make("TextLabel", {
-		Text = T_key and T(label) or label,
-		Size = UDim2.new(1,-68,0,20), Position = UDim2.new(0,10,0, desc and 7 or 9),
-		BackgroundTransparency = 1, TextColor3 = T.Text,
-		Font = Enum.Font.GothamBold, TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, row)
-	if desc then
-		Make("TextLabel", {
-			Text = T_key and T(desc) or desc,
-			Size = UDim2.new(1,-68,0,14), Position = UDim2.new(0,10,0,28),
-			BackgroundTransparency = 1, TextColor3 = T.SubText,
-			Font = Enum.Font.Gotham, TextSize = 10,
-			TextXAlignment = Enum.TextXAlignment.Left,
-		}, row)
-	end
-
-	-- track
-	local track = Make("Frame", {
-		Size = UDim2.new(0,44,0,22), Position = UDim2.new(1,-56,0.5,-11),
-		BackgroundColor3 = isOn and T.ToggleON or T.ToggleOFF,
-		BorderSizePixel = 0,
-	}, row)
-	Corner(99, track)
-	local ball = Make("Frame", {
-		Size = UDim2.new(0,16,0,16),
-		Position = isOn and UDim2.new(1,-19,0.5,-8) or UDim2.new(0,3,0.5,-8),
-		BackgroundColor3 = T.ToggleBall, BorderSizePixel = 0, ZIndex = 2,
-	}, track)
-	Corner(99, ball)
-	local ballGlow = Stroke(T.ToggleON, 2, isOn and 0.3 or 1, ball)
-
-	-- click overlay
-	local click = Make("TextButton", {
-		Size = UDim2.new(1,0,1,0),
-		BackgroundTransparency = 1, Text = "", ZIndex = 5,
-	}, row)
-
-	local ti = TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-	local tiBack = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-
-	click.MouseButton1Click:Connect(function()
-		isOn = not isOn
-		_Config[label] = isOn
-		SaveConfig()
-		if isOn then
-			Tween(track,    {BackgroundColor3=T.ToggleON},              0.25, Enum.EasingStyle.Quart):Play()
-			TS:Create(ball, tiBack, {Position=UDim2.new(1,-19,0.5,-8)}):Play()
-			Tween(ballGlow, {Transparency=0.3},                         0.25, Enum.EasingStyle.Quart):Play()
-			Tween(rowStroke,{Color=T.ToggleON, Transparency=0.5},       0.25, Enum.EasingStyle.Quart):Play()
-		else
-			Tween(track,    {BackgroundColor3=T.ToggleOFF},             0.25, Enum.EasingStyle.Quart):Play()
-			TS:Create(ball, tiBack, {Position=UDim2.new(0,3,0.5,-8)}):Play()
-			Tween(ballGlow, {Transparency=1},                           0.25, Enum.EasingStyle.Quart):Play()
-			Tween(rowStroke,{Color=T.Border, Transparency=0.88},        0.25, Enum.EasingStyle.Quart):Play()
-		end
-		-- squish animation
-		task.spawn(function()
-			Tween(ball, {Size=UDim2.new(0,20,0,20)}, 0.1, Enum.EasingStyle.Quad):Play()
-			task.wait(0.1)
-			TS:Create(ball, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-				{Size=UDim2.new(0,16,0,16)}):Play()
-		end)
-		if opts.callback then opts.callback(isOn) end
-	end)
-
-	return {
-		SetValue = function(v)
-			isOn = v; click.MouseButton1Click:Fire()
-		end,
-		GetValue = function() return isOn end,
-	}
-end
-
--- Button
-function KyxLib._TabMethods:Button(opts)
-	local T      = KyxLib.Theme
-	local label  = opts.label or "Button"
-	local btn = Make("TextButton", {
-		Text = T_key and T(label) or label,
-		Size = UDim2.new(1,0,0,34),
-		BackgroundColor3 = T.BtnBG,
-		TextColor3 = T.Accent, Font = Enum.Font.GothamBold,
-		TextSize = 12, BorderSizePixel = 0,
-	}, self._page)
-	Corner(9, btn)
-	Stroke(T.Accent, 1, 0.68, btn)
-	if opts.desc then
-		Make("TextLabel", {
-			Text = opts.desc,
-			Size = UDim2.new(1,0,0,12), Position = UDim2.new(0,0,1,-14),
-			BackgroundTransparency = 1, TextColor3 = T.SubText,
-			Font = Enum.Font.Gotham, TextSize = 9,
-		}, btn)
-		btn.Size = UDim2.new(1,0,0,48)
-		btn.TextYAlignment = Enum.TextYAlignment.Top
-		Make("UIPadding", {PaddingTop = UDim.new(0,9)}, btn)
-	end
-	btn.MouseEnter:Connect(function()  Tween(btn, {BackgroundColor3=T.BtnHover},  0.1):Play() end)
-	btn.MouseLeave:Connect(function()  Tween(btn, {BackgroundColor3=T.BtnBG},     0.1):Play() end)
-	btn.MouseButton1Down:Connect(function() Tween(btn, {BackgroundColor3=T.BtnActive}, 0.07):Play() end)
-	btn.MouseButton1Click:Connect(function()
-		task.delay(0.09, function() Tween(btn, {BackgroundColor3=T.BtnBG}, 0.1):Play() end)
-		if opts.callback then opts.callback() end
-	end)
-	return btn
-end
-
--- Dropdown
-function KyxLib._TabMethods:Dropdown(opts)
-	local T        = KyxLib.Theme
-	local lib      = self._lib
-	local label    = opts.label or "Dropdown"
-	local options  = opts.options or {}
-	local selected = opts.default or (options[1] or "เลือก...")
-	if opts.callback and opts.default then
-		pcall(opts.callback, opts.default)
-	end
-
-	local container = Make("Frame", {
-		Size = UDim2.new(1,0,0,54),
-		BackgroundColor3 = T.BG2, BorderSizePixel = 0,
-	}, self._page)
-	Corner(9, container)
-	Stroke(T.Border, 1, 0.82, container)
-
-	Make("TextLabel", {
-		Text = T_key and T(label) or label,
-		Size = UDim2.new(1,-16,0,18), Position = UDim2.new(0,10,0,5),
-		BackgroundTransparency = 1, TextColor3 = T.Text,
-		Font = Enum.Font.GothamBold, TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, container)
-
-	if opts.desc then
-		Make("TextLabel", {
-			Text = opts.desc, Size = UDim2.new(1,-16,0,12), Position = UDim2.new(0,10,0,22),
-			BackgroundTransparency = 1, TextColor3 = T.SubText,
-			Font = Enum.Font.Gotham, TextSize = 9,
-			TextXAlignment = Enum.TextXAlignment.Left,
-		}, container)
-	end
-
-	local dropBtn = Make("TextButton", {
-		Text = selected .. "  ▾",
-		Size = UDim2.new(0,148,0,22), Position = UDim2.new(1,-154,1,-28),
-		BackgroundColor3 = T.DropBG, TextColor3 = T.Accent,
-		Font = Enum.Font.GothamBold, TextSize = 11,
-		BorderSizePixel = 0, ZIndex = 3,
-	}, container)
-	Corner(6, dropBtn)
-	Stroke(T.Accent, 1, 0.6, dropBtn)
-
-	dropBtn.MouseButton1Click:Connect(function()
-		if lib._activeDropdown then lib:_closeDropdown(); return end
-		lib._dropOverlay.Visible = true
-
-		local absPos  = dropBtn.AbsolutePosition
-		local absSize = dropBtn.AbsoluteSize
-		local popup   = Make("Frame", {
-			Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4),
-			Size     = UDim2.new(0, absSize.X, 0, math.min(#options,7)*28 + 8),
-			BackgroundColor3 = T.DropBG, BorderSizePixel = 0, ZIndex = 60,
-		}, lib._dropOverlay)
-		Corner(8, popup)
-		Stroke(T.Accent, 1, 0.45, popup)
-
-		local scroll = Make("ScrollingFrame", {
-			Size = UDim2.new(1,-4,1,-4), Position = UDim2.new(0,2,0,2),
-			BackgroundTransparency = 1, BorderSizePixel = 0,
-			ScrollBarThickness = 3, ScrollBarImageColor3 = T.Accent,
-			AutomaticCanvasSize = Enum.AutomaticSize.Y,
-			CanvasSize = UDim2.new(0,0,0,0), ZIndex = 61,
-		}, popup)
-		Make("UIListLayout", {Padding=UDim.new(0,2), SortOrder=Enum.SortOrder.LayoutOrder}, scroll)
-
-		for _, opt in ipairs(options) do
-			local isActive = opt == selected
-			local item = Make("TextButton", {
-				Size = UDim2.new(1,0,0,26),
-				BackgroundColor3 = isActive and Color3.fromRGB(28,20,52) or T.DropItem,
-				Text = opt, TextColor3 = isActive and T.Accent or T.Text,
-				Font = isActive and Enum.Font.GothamBold or Enum.Font.Gotham,
-				TextSize = 11, BorderSizePixel = 0, ZIndex = 62,
-			}, scroll)
-			Corner(6, item)
-			if isActive then Stroke(T.Accent, 1, 0.5, item) end
-			item.MouseEnter:Connect(function()
-				if opt ~= selected then Tween(item,{BackgroundColor3=T.DropHover},0.1):Play() end
-			end)
-			item.MouseLeave:Connect(function()
-				if opt ~= selected then Tween(item,{BackgroundColor3=T.DropItem},0.1):Play() end
-			end)
-			item.MouseButton1Click:Connect(function()
-				selected = opt
-				dropBtn.Text = selected .. "  ▾"
-				lib:_closeDropdown()
-				if opts.callback then opts.callback(selected) end
-			end)
-		end
-		lib._activeDropdown = popup
-	end)
-
-	return container, function() return selected end
-end
-
--- Slider
-function KyxLib._TabMethods:Slider(opts)
-	local T      = KyxLib.Theme
-	local label  = opts.label or "Slider"
-	local min    = opts.min   or 0
-	local max    = opts.max   or 100
-	local step   = opts.step  or 1
-	local val    = opts.default or min
-	local suffix = opts.suffix or ""
-
-	local row = Make("Frame", {
-		Size = UDim2.new(1,0,0,52),
-		BackgroundColor3 = T.BG2, BorderSizePixel = 0,
-	}, self._page)
-	Corner(10, row)
-	Stroke(T.Border, 1, 0.88, row)
-
-	local lbl = Make("TextLabel", {
-		Text = (T_key and T(label) or label) .. ":  " .. val .. suffix,
-		Size = UDim2.new(1,-12,0,18), Position = UDim2.new(0,10,0,7),
-		BackgroundTransparency = 1, TextColor3 = T.Text,
-		Font = Enum.Font.GothamBold, TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, row)
-
-	local track = Make("Frame", {
-		Size = UDim2.new(1,-20,0,6), Position = UDim2.new(0,10,0,33),
-		BackgroundColor3 = T.SliderBG, BorderSizePixel = 0,
-	}, row)
-	Corner(99, track)
-
-	local fill = Make("Frame", {
-		Size = UDim2.new((val-min)/(max-min),0,1,0),
-		BackgroundColor3 = T.SliderFill, BorderSizePixel = 0,
-	}, track)
-	Corner(99, fill)
-
-	local knob = Make("Frame", {
-		Size = UDim2.new(0,14,0,14),
-		Position = UDim2.new((val-min)/(max-min),0,0.5,-7),
-		BackgroundColor3 = Color3.fromRGB(230,210,255), BorderSizePixel = 0, ZIndex = 2,
-	}, track)
-	Corner(99, knob)
-	Stroke(T.Accent, 2, 0.2, knob)
-
-	local dragging = false
-	local function update(absX)
-		local rel   = math.clamp((absX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-		local raw   = min + rel * (max - min)
-		local snapped = math.round(raw / step) * step
-		snapped = math.clamp(snapped, min, max)
-		val = snapped
-		local pct = (val - min) / (max - min)
-		Tween(fill,  {Size     = UDim2.new(pct, 0, 1, 0)},           0.05):Play()
-		Tween(knob,  {Position = UDim2.new(pct, -7, 0.5, -7)},       0.05):Play()
-		lbl.Text = (T_key and T(label) or label) .. ":  " .. val .. suffix
-		if opts.callback then opts.callback(val) end
-	end
-
-	track.InputBegan:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true; update(inp.Position.X)
-		end
-	end)
-	UIS.InputChanged:Connect(function(inp)
-		if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
-			update(inp.Position.X)
-		end
-	end)
-	UIS.InputEnded:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-	end)
-
-	return {
-		SetValue = function(v) val=v; update(track.AbsolutePosition.X + (v-min)/(max-min)*track.AbsoluteSize.X) end,
-		GetValue = function() return val end,
-	}
-end
-
--- Input (TextBox)
-function KyxLib._TabMethods:Input(opts)
-	local T     = KyxLib.Theme
-	local label = opts.label or "Input"
-	local row = Make("Frame", {
-		Size = UDim2.new(1,0,0,52),
-		BackgroundColor3 = T.BG2, BorderSizePixel = 0,
-	}, self._page)
-	Corner(9, row)
-	Stroke(T.Border, 1, 0.85, row)
-	Make("TextLabel", {
-		Text = T_key and T(label) or label,
-		Size = UDim2.new(1,-16,0,18), Position = UDim2.new(0,10,0,5),
-		BackgroundTransparency = 1, TextColor3 = T.Text,
-		Font = Enum.Font.GothamBold, TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, row)
-	local box = Make("TextBox", {
-		Text = opts.default or "",
-		PlaceholderText = opts.placeholder or "พิมพ์...",
-		Size = UDim2.new(1,-20,0,22), Position = UDim2.new(0,10,0,25),
-		BackgroundColor3 = T.BG3, TextColor3 = T.Text,
-		PlaceholderColor3 = T.SubText,
-		Font = Enum.Font.Gotham, TextSize = 11,
-		BorderSizePixel = 0, ClearTextOnFocus = false, ZIndex = 2,
-	}, row)
-	Corner(6, box)
-	Stroke(T.Accent, 1, 0.7, box)
-	Make("UIPadding", {PaddingLeft = UDim.new(0,6)}, box)
-	box.FocusLost:Connect(function(enter)
-		if opts.callback then opts.callback(box.Text, enter) end
-	end)
-	return { GetValue = function() return box.Text end }
-end
-
--- Label
-function KyxLib._TabMethods:Label(text, color)
-	local T = KyxLib.Theme
-	local lbl = Make("TextLabel", {
-		Text = text or "",
-		Size = UDim2.new(1,0,0,24),
-		BackgroundTransparency = 1,
-		TextColor3 = color or T.SubText,
-		Font = Enum.Font.Gotham, TextSize = 11,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, self._page)
-	Make("UIPadding", {PaddingLeft = UDim.new(0,6)}, lbl)
-	return { SetText = function(t) lbl.Text = t end }
-end
-
--- Status row (dot + text)
-function KyxLib._TabMethods:Status(initText)
-	local T   = KyxLib.Theme
-	local row = Make("Frame", {
-		Size = UDim2.new(1,0,0,28),
-		BackgroundColor3 = T.BG, BorderSizePixel = 0,
-	}, self._page)
-	Corner(8, row)
-	local dot = Make("Frame", {
-		Size = UDim2.new(0,7,0,7), Position = UDim2.new(0,10,0.5,-3.5),
-		BackgroundColor3 = Color3.fromRGB(70,70,80), BorderSizePixel = 0,
-	}, row)
-	Corner(99, dot)
-	local lbl = Make("TextLabel", {
-		Text = initText or "IDLE",
-		Size = UDim2.new(1,-28,1,0), Position = UDim2.new(0,24,0,0),
-		BackgroundTransparency = 1, TextColor3 = T.SubText,
-		Font = Enum.Font.Gotham, TextSize = 10,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, row)
-	return {
-		SetText = function(t, clr) lbl.Text = t; if clr then lbl.TextColor3 = clr end end,
-		SetDot  = function(clr)    dot.BackgroundColor3 = clr end,
-	}
-end
-
--- Keybind display
-function KyxLib._TabMethods:Keybind(opts)
-	local T     = KyxLib.Theme
-	local label = opts.label or "Keybind"
-	local key   = opts.default or Enum.KeyCode.Unknown
-	local row   = Make("Frame", {
-		Size = UDim2.new(1,0,0,38),
-		BackgroundColor3 = T.BG2, BorderSizePixel = 0,
-	}, self._page)
-	Corner(9, row)
-	Stroke(T.Border, 1, 0.88, row)
-	Make("TextLabel", {
-		Text = T_key and T(label) or label,
-		Size = UDim2.new(1,-80,0,20), Position = UDim2.new(0,10,0.5,-10),
-		BackgroundTransparency = 1, TextColor3 = T.Text,
-		Font = Enum.Font.GothamBold, TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, row)
-	local keyLbl = Make("TextLabel", {
-		Text = "[" .. tostring(key.Name or key) .. "]",
-		Size = UDim2.new(0,70,0,24), Position = UDim2.new(1,-76,0.5,-12),
-		BackgroundColor3 = T.BG3, TextColor3 = T.Accent,
-		Font = Enum.Font.GothamBold, TextSize = 10, BorderSizePixel = 0,
-	}, row)
-	Corner(6, keyLbl)
-	Stroke(T.Accent, 1, 0.6, keyLbl)
-	local listening = false
-	keyLbl.MouseButton1Click:Connect(function()
-		listening = true
-		keyLbl.Text = "[...]"
-		keyLbl.TextColor3 = T.Warning
-	end)
-	UIS.InputBegan:Connect(function(inp, processed)
-		if listening and not processed and inp.UserInputType == Enum.UserInputType.Keyboard then
-			key = inp.KeyCode
-			listening = false
-			keyLbl.Text = "[" .. tostring(key.Name) .. "]"
-			keyLbl.TextColor3 = T.Accent
-			if opts.callback then opts.callback(key) end
-		end
-	end)
-	return { GetValue = function() return key end }
-end
-
--- ============================================================
--- (end of KyxLib)
--- ============================================================
-
 local function BuildGUI()
 
-	-- ===== KyxLib Window Setup =====
+	local GeminiUI = {
+	Visible   = true,
+	Minimized = false,
+	MainSize  = UDim2.new(0, 400, 0, 300),
+	MinSize   = UDim2.new(0, 44, 0, 44),
+	GUIConnections = {}
+	}
+
+	local Theme = {
+	MainBG      = Color3.fromRGB(8, 8, 16),
+	TopBar      = Color3.fromRGB(12, 11, 22),
+	Accent      = Color3.fromRGB(140, 100, 255),
+	AccentOff   = Color3.fromRGB(55, 50, 80),
+	Text        = Color3.fromRGB(225, 220, 245),
+	Secondary   = Color3.fromRGB(15, 14, 26),
+	Close       = Color3.fromRGB(200, 55, 55),
+	ToggleON    = Color3.fromRGB(120, 80, 240),
+	ToggleOFF   = Color3.fromRGB(35, 33, 55),
+	ToggleBall  = Color3.fromRGB(240, 235, 255),
+	Border      = Color3.fromRGB(100, 70, 200),
+	SubText     = Color3.fromRGB(100, 92, 140),
+	BtnHover    = Color3.fromRGB(22, 18, 40),
+	Warning     = Color3.fromRGB(255, 140, 30),
+	DropdownBG  = Color3.fromRGB(12, 11, 22),
+	DropdownItem= Color3.fromRGB(18, 17, 30),
+	DropdownHov = Color3.fromRGB(100, 70, 200),
+	}
+
+	-- ===== ScreenGui =====
 
 	local ScreenGui = Instance.new("ScreenGui")
 	ScreenGui.Name = "KYX_HUB_V3"
@@ -3836,116 +2884,524 @@ local function BuildGUI()
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.Parent = CoreGui
 
-	-- สร้าง window ผ่าน KyxLib
-	local Win = KyxLib.new(ScreenGui, {
-		title    = "KYX HUB",
-		subtitle = "Kyx Hub  •  v16.7",
-		size     = UDim2.new(0,400,0,300),
+	-- ===== Main Frame =====
+
+	local MainFrame = Instance.new("Frame")
+	MainFrame.Name = "MainFrame"
+	MainFrame.Size = GeminiUI.MainSize
+	MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	MainFrame.BackgroundColor3 = Theme.MainBG
+	MainFrame.BorderSizePixel = 0
+	MainFrame.ClipsDescendants = true
+	MainFrame.BackgroundTransparency = 1
+	MainFrame.Parent = ScreenGui
+	Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,18)
+
+	local MainStroke = Instance.new("UIStroke", MainFrame)
+	MainStroke.Color = Color3.fromRGB(110,70,230); MainStroke.Thickness = 1.5; MainStroke.Transparency = 0.55
+
+	-- ===== Title Bar =====
+
+	local TitleBar = Instance.new("Frame")
+	TitleBar.Name = "TitleBar"; TitleBar.Size = UDim2.new(1,0,0,46)
+	TitleBar.BackgroundColor3 = Color3.fromRGB(12,10,22); TitleBar.BorderSizePixel = 0; TitleBar.ZIndex = 2
+	TitleBar.Parent = MainFrame
+	Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,18)
+	local TFix = Instance.new("Frame", TitleBar)
+	TFix.Size = UDim2.new(1,0,0,12); TFix.Position = UDim2.new(0,0,1,-12)
+	TFix.BackgroundColor3 = Color3.fromRGB(12,10,22); TFix.BorderSizePixel = 0; TFix.ZIndex = 2
+
+	local AccentLine = Instance.new("Frame", TitleBar)
+	AccentLine.Size = UDim2.new(1,0,0,1); AccentLine.Position = UDim2.new(0,0,1,0)
+	AccentLine.BackgroundColor3 = Theme.Accent; AccentLine.BorderSizePixel = 0; AccentLine.ZIndex = 3
+	local AccGrad = Instance.new("UIGradient", AccentLine)
+	AccGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(8,8,16)),
+	ColorSequenceKeypoint.new(0.25, Color3.fromRGB(100,60,220)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(160,100,255)),
+	ColorSequenceKeypoint.new(0.75, Color3.fromRGB(80,180,255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(8,8,16)),
 	})
 
-	-- ── Compatibility shims ───────────────────────────────────────────
-	-- ให้โค้ด tab เดิม (CreateToggle/CreateButton/CreateTab/etc.) ยังทำงานได้
+	local TitleDot = Instance.new("Frame", TitleBar)
+	TitleDot.Size = UDim2.new(0,7,0,7); TitleDot.Position = UDim2.new(0,16,0.5,-3.5)
+	TitleDot.BackgroundColor3 = Color3.fromRGB(160,100,255); TitleDot.BorderSizePixel = 0; TitleDot.ZIndex = 3
+	Instance.new("UICorner", TitleDot).CornerRadius = UDim.new(1,0)
+	local TitleDotStroke = Instance.new("UIStroke", TitleDot)
+	TitleDotStroke.Color = Color3.fromRGB(200,150,255); TitleDotStroke.Thickness = 2; TitleDotStroke.Transparency = 0.3
 
-	local Theme = KyxLib.Theme  -- alias เดิม
-	local TweenService = game:GetService("TweenService")
+	local TitleText = Instance.new("TextLabel", TitleBar)
+	TitleText.Text = "KYX HUB"; TitleText.Size = UDim2.new(0,160,0,18); TitleText.Position = UDim2.new(0,28,0,8)
+	TitleText.BackgroundTransparency = 1; TitleText.TextColor3 = Theme.Text
+	TitleText.Font = Enum.Font.GothamBlack; TitleText.TextSize = 13; TitleText.TextXAlignment = Enum.TextXAlignment.Left; TitleText.ZIndex = 3
+	local TitleGrad = Instance.new("UIGradient", TitleText)
+	TitleGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(200,170,255)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(130,90,255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(80,180,255)),
+	})
 
-	-- TabPages: เก็บ {Page = scrollFrame} สำหรับ CreateToggle ใช้
+	local SubTitleText = Instance.new("TextLabel", TitleBar)
+	SubTitleText.Text = "Kyx Hub  \u{2022}  v16.7"
+	SubTitleText.Size = UDim2.new(0,200,0,13); SubTitleText.Position = UDim2.new(0,28,0,24)
+	SubTitleText.BackgroundTransparency = 1; SubTitleText.TextColor3 = Theme.SubText
+	SubTitleText.Font = Enum.Font.Gotham; SubTitleText.TextSize = 9; SubTitleText.TextXAlignment = Enum.TextXAlignment.Left; SubTitleText.ZIndex = 3
+
+	-- ===== Key Expiry Label in TitleBar =====
+
+	local KeyExpiryLabel = Instance.new("TextLabel", TitleBar)
+	KeyExpiryLabel.Size = UDim2.new(0,260,0,11); KeyExpiryLabel.Position = UDim2.new(0,28,0,36)
+	KeyExpiryLabel.BackgroundTransparency = 1; KeyExpiryLabel.TextColor3 = Color3.fromRGB(180,145,50)
+	KeyExpiryLabel.Font = Enum.Font.Gotham; KeyExpiryLabel.TextSize = 9; KeyExpiryLabel.TextXAlignment = Enum.TextXAlignment.Left; KeyExpiryLabel.ZIndex = 3
+	KeyExpiryLabel.Text = "\u{1F511} กำลังตรวจสอบ Key..."
+	task.spawn(function()
+		while true do
+			local ok, timeMsg = checkKey()
+			KeyExpiryLabel.Text = "\u{1F511} " .. timeMsg
+			if ok then
+				KeyExpiryLabel.TextColor3 = Color3.fromRGB(120, 200, 100)
+			else
+				KeyExpiryLabel.TextColor3 = Color3.fromRGB(200, 60, 60)
+			end
+			task.wait(60)
+		end
+	end)
+
+	local MinBtn = Instance.new("TextButton", TitleBar)
+	MinBtn.Text = "\u{2212}"; MinBtn.Size = UDim2.new(0,28,0,28); MinBtn.Position = UDim2.new(1,-68,0.5,-14)
+	MinBtn.BackgroundColor3 = Color3.fromRGB(30,28,22); MinBtn.TextColor3 = Theme.Accent
+	MinBtn.Font = Enum.Font.GothamBold; MinBtn.TextSize = 16; MinBtn.BorderSizePixel = 0; MinBtn.ZIndex = 4
+	Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0,7)
+	local MinStroke = Instance.new("UIStroke", MinBtn)
+	MinStroke.Color = Theme.Accent; MinStroke.Thickness = 1; MinStroke.Transparency = 0.6
+
+	local CloseBtn = Instance.new("TextButton", TitleBar)
+	CloseBtn.Text = "\u{2715}"; CloseBtn.Size = UDim2.new(0,28,0,28); CloseBtn.Position = UDim2.new(1,-34,0.5,-14)
+	CloseBtn.BackgroundColor3 = Color3.fromRGB(35,18,18); CloseBtn.TextColor3 = Color3.fromRGB(210,70,70)
+	CloseBtn.Font = Enum.Font.GothamBold; CloseBtn.TextSize = 11; CloseBtn.BorderSizePixel = 0; CloseBtn.ZIndex = 4
+	Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0,7)
+	local CloseStroke = Instance.new("UIStroke", CloseBtn)
+	CloseStroke.Color = Color3.fromRGB(180,50,50); CloseStroke.Thickness = 1; CloseStroke.Transparency = 0.5
+
+	-- ===== Content Area =====
+
+	local ContentFrame = Instance.new("Frame", MainFrame)
+	ContentFrame.Name = "ContentFrame"; ContentFrame.Size = UDim2.new(1,0,1,-48); ContentFrame.Position = UDim2.new(0,0,0,48)
+	ContentFrame.BackgroundTransparency = 1; ContentFrame.ClipsDescendants = true
+
+	-- ===== Tab Bar (ScrollingFrame so tabs can scroll) =====
+
+	local TabBarOuter = Instance.new("Frame", ContentFrame)
+	TabBarOuter.Name = "TabBarOuter"; TabBarOuter.Size = UDim2.new(0,116,1,-12); TabBarOuter.Position = UDim2.new(0,7,0,6)
+	TabBarOuter.BackgroundColor3 = Color3.fromRGB(11,10,18); TabBarOuter.BorderSizePixel = 0
+	TabBarOuter.ClipsDescendants = true
+	Instance.new("UICorner", TabBarOuter).CornerRadius = UDim.new(0,14)
+	local TabBarOuterStroke = Instance.new("UIStroke", TabBarOuter)
+	TabBarOuterStroke.Color = Color3.fromRGB(100,80,220); TabBarOuterStroke.Thickness = 1; TabBarOuterStroke.Transparency = 0.65
+	-- subtle gradient on sidebar
+	local TabBarGrad = Instance.new("UIGradient", TabBarOuter)
+	TabBarGrad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(18,15,30)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(10,9,18)),
+	})
+	TabBarGrad.Rotation = 90
+
+	local TabBar = Instance.new("ScrollingFrame", TabBarOuter)
+	TabBar.Name = "TabBar"
+	TabBar.Size = UDim2.new(1,0,1,0)
+	TabBar.Position = UDim2.new(0,0,0,0)
+	TabBar.BackgroundTransparency = 1
+	TabBar.BorderSizePixel = 0
+	TabBar.ScrollBarThickness = 0
+	TabBar.ScrollingDirection = Enum.ScrollingDirection.Y
+	TabBar.CanvasSize = UDim2.new(0,0,0,0)
+	TabBar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	TabBar.ClipsDescendants = true
+	local TabList = Instance.new("UIListLayout", TabBar)
+	TabList.Padding = UDim.new(0,3); TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	local TabPad = Instance.new("UIPadding", TabBar)
+	TabPad.PaddingTop = UDim.new(0,10); TabPad.PaddingLeft = UDim.new(0,6); TabPad.PaddingRight = UDim.new(0,6); TabPad.PaddingBottom = UDim.new(0,10)
+
+	-- ===== Panel =====
+
+	local PanelFrame = Instance.new("Frame", ContentFrame)
+	PanelFrame.Name = "PanelFrame"; PanelFrame.Size = UDim2.new(1,-134,1,-12); PanelFrame.Position = UDim2.new(0,127,0,6)
+	PanelFrame.BackgroundColor3 = Color3.fromRGB(11,10,20); PanelFrame.BorderSizePixel = 0
+	Instance.new("UICorner", PanelFrame).CornerRadius = UDim.new(0,14)
+	local PanelStroke = Instance.new("UIStroke", PanelFrame)
+	PanelStroke.Color = Color3.fromRGB(90,60,180); PanelStroke.Thickness = 1; PanelStroke.Transparency = 0.7
+
+	local PanelContainer = Instance.new("Frame", PanelFrame)
+	PanelContainer.Name = "PanelContainer"; PanelContainer.Size = UDim2.new(1,-4,1,-4); PanelContainer.Position = UDim2.new(0,2,0,2)
+	PanelContainer.BackgroundTransparency = 1; PanelContainer.ClipsDescendants = true
+
+	-- ===== TAB SYSTEM =====
+
 	local TabPages = {}
+	local ActiveTab = nil
 
 	local function CreateTab(name, icon)
-		local tabApi = Win:Tab(name, icon)
-		TabPages[name] = tabApi
-		return tabApi._page  -- ส่ง page กลับ (ScrollingFrame) เพื่อ backward compat
+		local btn = Instance.new("TextButton")
+		local _tabIcon = icon or ""
+		-- show icon on one line, label on next for compact tabs
+		btn.Text = _tabIcon .. "  " .. T(name)
+		table.insert(_LangLabels, {lbl=btn, key=name, prefix=_tabIcon.."  "})
+		btn.Size = UDim2.new(1,0,0,34)
+		btn.BackgroundColor3 = Color3.fromRGB(14,12,24)
+		btn.TextColor3 = Theme.SubText
+		btn.Font = Enum.Font.GothamBold
+		btn.TextSize = 11
+		btn.BorderSizePixel = 0
+		btn.TextXAlignment = Enum.TextXAlignment.Left
+		btn.ZIndex = 2
+		btn.AutoButtonColor = false
+		btn.Parent = TabBar
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+		local BtnPad = Instance.new("UIPadding", btn); BtnPad.PaddingLeft = UDim.new(0,10)
+
+		-- left accent bar
+		local indicator = Instance.new("Frame", btn)
+		indicator.Size = UDim2.new(0,3,0,18); indicator.Position = UDim2.new(0,0,0.5,-9)
+		indicator.BackgroundColor3 = Theme.Accent; indicator.BorderSizePixel = 0; indicator.BackgroundTransparency = 1
+		Instance.new("UICorner", indicator).CornerRadius = UDim.new(1,0)
+
+		-- active glow background
+		local activeBG = Instance.new("Frame", btn)
+		activeBG.Size = UDim2.new(1,0,1,0); activeBG.Position = UDim2.new(0,0,0,0)
+		activeBG.BackgroundColor3 = Theme.Accent; activeBG.BackgroundTransparency = 1; activeBG.BorderSizePixel = 0; activeBG.ZIndex = 0
+		Instance.new("UICorner", activeBG).CornerRadius = UDim.new(0,10)
+		local activeBGStroke = Instance.new("UIStroke", activeBG)
+		activeBGStroke.Color = Theme.Accent; activeBGStroke.Thickness = 1; activeBGStroke.Transparency = 1
+
+		local page = Instance.new("ScrollingFrame")
+		page.Name = "Page_"..name; page.Size = UDim2.new(1,0,1,0)
+		page.BackgroundTransparency = 1; page.BorderSizePixel = 0; page.Visible = false
+		page.ScrollBarThickness = 3; page.ScrollBarImageColor3 = Theme.Accent
+		page.ScrollingDirection = Enum.ScrollingDirection.Y
+		page.CanvasSize = UDim2.new(0,0,0,0); page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		page.Parent = PanelContainer
+
+		local pageList = Instance.new("UIListLayout", page)
+		pageList.Padding = UDim.new(0,5); pageList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		pageList.SortOrder = Enum.SortOrder.LayoutOrder
+		local pagePad = Instance.new("UIPadding", page)
+		pagePad.PaddingTop = UDim.new(0,8); pagePad.PaddingBottom = UDim.new(0,12)
+		pagePad.PaddingLeft = UDim.new(0,8); pagePad.PaddingRight = UDim.new(0,8)
+
+		TabPages[name] = {Button=btn, Page=page, Indicator=indicator, ActiveBG=activeBG, ActiveBGStroke=activeBGStroke}
+
+		btn.MouseEnter:Connect(function()
+			if ActiveTab ~= name then
+				TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3=Color3.fromRGB(22,18,40)}):Play()
+			end
+		end)
+		btn.MouseLeave:Connect(function()
+			if ActiveTab ~= name then
+				TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3=Color3.fromRGB(14,12,24)}):Play()
+			end
+		end)
+
+		btn.MouseButton1Click:Connect(function()
+		for _, t in pairs(TabPages) do
+			TweenService:Create(t.Button, TweenInfo.new(0.18), {BackgroundColor3=Color3.fromRGB(14,12,24), TextColor3=Theme.SubText}):Play()
+			t.Page.Visible = false
+			TweenService:Create(t.Indicator, TweenInfo.new(0.18), {BackgroundTransparency=1}):Play()
+			TweenService:Create(t.ActiveBG, TweenInfo.new(0.18), {BackgroundTransparency=1}):Play()
+			TweenService:Create(t.ActiveBGStroke, TweenInfo.new(0.18), {Transparency=1}):Play()
+		end
+		TweenService:Create(btn, TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+			{BackgroundColor3=Color3.fromRGB(28,20,55), TextColor3=Color3.fromRGB(200,170,255)}):Play()
+		TweenService:Create(indicator, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency=0}):Play()
+		TweenService:Create(activeBG, TweenInfo.new(0.22), {BackgroundTransparency=0.88}):Play()
+		TweenService:Create(activeBGStroke, TweenInfo.new(0.22), {Transparency=0.65}):Play()
+		page.Visible = true; ActiveTab = name
+		page.Position = UDim2.new(0.04,0,0,0)
+		page:TweenPosition(UDim2.new(0,0,0,0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.18, true)
+	end)
+	return page
 	end
 
-	local function CreateSectionHeader(parent, text)
-		local tabApi = TabPages[parent] or {_page=parent}
-		if getmetatable(tabApi) and getmetatable(tabApi).__index == KyxLib._TabMethods then
-			return tabApi:Section(text)
-		else
-			-- fallback: parent คือ page โดยตรง
-			local T = KyxLib.Theme
-			local hdr = Instance.new("Frame", parent)
-			hdr.Size = UDim2.new(1,0,0,20); hdr.BackgroundTransparency = 1
-			local line = Instance.new("Frame", hdr)
-			line.Size = UDim2.new(1,0,0,1); line.Position = UDim2.new(0,0,0.5,0)
-			line.BackgroundColor3 = T.Accent; line.BackgroundTransparency = 0.82; line.BorderSizePixel = 0
-			local lbl = Instance.new("TextLabel", hdr)
-			lbl.Text = "  " .. text .. "  "
-			lbl.Size = UDim2.new(0,0,1,0); lbl.AutomaticSize = Enum.AutomaticSize.X
-			lbl.Position = UDim2.new(0,8,0,0)
-			lbl.BackgroundColor3 = Color3.fromRGB(11,10,20)
-			lbl.TextColor3 = T.Accent; lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 9; lbl.ZIndex = 2
-			return hdr
-		end
-	end
+	-- ===== TOGGLE =====
 
 	local function CreateToggle(parent, labelText, description, defaultVal, callback)
-		-- หา tabApi จาก parent (page)
-		local fakeTab = {_page = parent, _lib = Win}
-		setmetatable(fakeTab, {__index = KyxLib._TabMethods})
-		return fakeTab:Toggle({
-			label    = labelText,
-			desc     = description,
-			default  = defaultVal,
-			callback = callback,
-		})
+		-- โหลด config ถ้ามี ไม่งั้นใช้ defaultVal
+		local savedVal = _Config[labelText]
+		local initVal = (savedVal ~= nil) and savedVal or defaultVal
+		-- อัปเดต global ให้ตรงกับ config ที่โหลดมาทันที
+		if savedVal ~= nil and callback then
+			pcall(function() callback(initVal) end)
+		end
+
+		local row = Instance.new("Frame")
+		row.Size = UDim2.new(1,0,0,46); row.BackgroundColor3 = Color3.fromRGB(16,15,20); row.BorderSizePixel = 0; row.Parent = parent
+		Instance.new("UICorner", row).CornerRadius = UDim.new(0,10)
+		local RowStroke = Instance.new("UIStroke", row); RowStroke.Color = Theme.Border; RowStroke.Thickness = 1; RowStroke.Transparency = 0.88
+
+		local lbl = Instance.new("TextLabel", row)
+		lbl.Size = UDim2.new(1,-68,0,20); lbl.Position = UDim2.new(0,10,0,7)
+		lbl.BackgroundTransparency = 1; lbl.TextColor3 = Theme.Text; lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 12; lbl.TextXAlignment = Enum.TextXAlignment.Left
+		TR(lbl, labelText)  -- auto-refresh on lang change
+
+		if description then
+			local desc = Instance.new("TextLabel", row)
+			desc.Size = UDim2.new(1,-68,0,14); desc.Position = UDim2.new(0,10,0,28)
+			desc.BackgroundTransparency = 1; desc.TextColor3 = Theme.SubText; desc.Font = Enum.Font.Gotham; desc.TextSize = 10; desc.TextXAlignment = Enum.TextXAlignment.Left
+			TR(desc, description)  -- auto-refresh description
+		end
+
+		local track = Instance.new("Frame", row)
+		track.Size = UDim2.new(0,44,0,22); track.Position = UDim2.new(1,-56,0.5,-11)
+		track.BackgroundColor3 = initVal and Theme.ToggleON or Theme.ToggleOFF; track.BorderSizePixel = 0
+		Instance.new("UICorner", track).CornerRadius = UDim.new(1,0)
+
+		local ball = Instance.new("Frame", track)
+		ball.Size = UDim2.new(0,16,0,16); ball.Position = initVal and UDim2.new(1,-19,0.5,-8) or UDim2.new(0,3,0.5,-8)
+		ball.BackgroundColor3 = Theme.ToggleBall; ball.BorderSizePixel = 0; ball.ZIndex = 2
+		Instance.new("UICorner", ball).CornerRadius = UDim.new(1,0)
+		local ballGlow = Instance.new("UIStroke", ball); ballGlow.Color = Theme.ToggleON; ballGlow.Thickness = 2; ballGlow.Transparency = initVal and 0.3 or 1
+
+		local isOn = initVal
+		local clickBtn = Instance.new("TextButton", row)
+		clickBtn.Size = UDim2.new(1,0,1,0); clickBtn.BackgroundTransparency = 1; clickBtn.Text = ""; clickBtn.ZIndex = 5
+
+		clickBtn.MouseButton1Click:Connect(function()
+		isOn = not isOn
+		-- บันทึก config ทันที
+		_Config[labelText] = isOn
+		SaveConfig()
+		local ti = TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+		if isOn then
+			TweenService:Create(track, ti, {BackgroundColor3=Theme.ToggleON}):Play()
+			TweenService:Create(ball, TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out), {Position=UDim2.new(1,-19,0.5,-8)}):Play()
+			TweenService:Create(ballGlow, ti, {Transparency=0.3}):Play()
+			TweenService:Create(RowStroke, ti, {Color=Theme.ToggleON, Transparency=0.5}):Play()
+		else
+			TweenService:Create(track, ti, {BackgroundColor3=Theme.ToggleOFF}):Play()
+			TweenService:Create(ball, TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out), {Position=UDim2.new(0,3,0.5,-8)}):Play()
+			TweenService:Create(ballGlow, ti, {Transparency=1}):Play()
+			TweenService:Create(RowStroke, ti, {Color=Theme.Border, Transparency=0.85}):Play()
+		end
+		task.spawn(function()
+		TweenService:Create(ball, TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out), {Size=UDim2.new(0,20,0,20)}):Play()
+		task.wait(0.1)
+		TweenService:Create(ball, TweenInfo.new(0.15,Enum.EasingStyle.Back,Enum.EasingDirection.Out), {Size=UDim2.new(0,16,0,16)}):Play()
+	end)
+	if callback then callback(isOn) end
+	end)
+	return row
 	end
+
+	-- ===== SECTION HEADER =====
+
+	local function CreateSectionHeader(parent, text)
+		local header = Instance.new("Frame", parent)
+		header.Size = UDim2.new(1,0,0,20); header.BackgroundTransparency = 1
+		local line = Instance.new("Frame", header)
+		line.Size = UDim2.new(1,0,0,1); line.Position = UDim2.new(0,0,0.5,0)
+		line.BackgroundColor3 = Theme.Accent; line.BackgroundTransparency = 0.82; line.BorderSizePixel = 0
+		local lbl = Instance.new("TextLabel", header)
+		table.insert(_LangLabels, {lbl=lbl, key=text, prefix="  ", suffix="  "})
+		lbl.Text = "  "..T(text).."  "; lbl.Size = UDim2.new(0,0,1,0); lbl.AutomaticSize = Enum.AutomaticSize.X
+		lbl.Position = UDim2.new(0,8,0,0); lbl.BackgroundColor3 = Color3.fromRGB(13,12,17)
+		lbl.TextColor3 = Theme.Accent; lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 9; lbl.ZIndex = 2
+		return header
+	end
+
+	-- ===== ACTION BUTTON =====
 
 	local function CreateButton(parent, text, callback)
-		local fakeTab = {_page = parent, _lib = Win}
-		setmetatable(fakeTab, {__index = KyxLib._TabMethods})
-		return fakeTab:Button({label=text, callback=callback})
+		local btn = Instance.new("TextButton", parent)
+		TR(btn, text); btn.Size = UDim2.new(1,0,0,32); btn.BackgroundColor3 = Color3.fromRGB(20,18,12)
+		btn.TextColor3 = Theme.Accent; btn.Font = Enum.Font.GothamBold; btn.TextSize = 11; btn.BorderSizePixel = 0
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+		local bs = Instance.new("UIStroke", btn); bs.Color = Theme.Accent; bs.Thickness = 1; bs.Transparency = 0.72
+		btn.MouseEnter:Connect(function() TweenService:Create(btn,TweenInfo.new(0.1),{BackgroundColor3=Color3.fromRGB(32,28,14)}):Play() end)
+		btn.MouseLeave:Connect(function() TweenService:Create(btn,TweenInfo.new(0.1),{BackgroundColor3=Color3.fromRGB(20,18,12)}):Play() end)
+		btn.MouseButton1Click:Connect(function()
+		TweenService:Create(btn,TweenInfo.new(0.07),{BackgroundColor3=Color3.fromRGB(12,11,8)}):Play()
+		task.delay(0.09, function() TweenService:Create(btn,TweenInfo.new(0.1),{BackgroundColor3=Color3.fromRGB(20,18,12)}):Play() end)
+		if callback then callback() end
+	end)
+	return btn
 	end
 
-	local function CreateDropdown(parent, labelText, description, options, defaultVal, callback)
-		local fakeTab = {_page = parent, _lib = Win}
-		setmetatable(fakeTab, {__index = KyxLib._TabMethods})
-		return fakeTab:Dropdown({
-			label    = labelText,
-			desc     = description,
-			options  = options,
-			default  = defaultVal,
-			callback = callback,
-		})
-	end
+	-- ===== STATUS ROW =====
 
 	local function CreateStatusRow(parent, initText)
-		local fakeTab = {_page = parent, _lib = Win}
-		setmetatable(fakeTab, {__index = KyxLib._TabMethods})
-		local s = fakeTab:Status(initText)
-		-- backward compat: return row, dot, lbl
-		local row = parent:FindFirstChild("Frame", true)  -- last added
-		local dot = row and row:FindFirstChild("Frame")
-		local lbl = row and row:FindFirstChild("TextLabel")
+		local row = Instance.new("Frame", parent)
+		row.Size = UDim2.new(1,0,0,30); row.BackgroundColor3 = Theme.MainBG; row.BorderSizePixel = 0
+		Instance.new("UICorner", row).CornerRadius = UDim.new(0,8)
+		local dot = Instance.new("Frame", row)
+		dot.Size = UDim2.new(0,7,0,7); dot.Position = UDim2.new(0,10,0.5,-3.5)
+		dot.BackgroundColor3 = Color3.fromRGB(70,70,80); dot.BorderSizePixel = 0
+		Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
+		local lbl = Instance.new("TextLabel", row)
+		lbl.Text = initText or ""; lbl.Size = UDim2.new(1,-28,1,0); lbl.Position = UDim2.new(0,24,0,0)
+		lbl.BackgroundTransparency = 1; lbl.TextColor3 = Theme.SubText; lbl.Font = Enum.Font.Gotham; lbl.TextSize = 10
+		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		return row, dot, lbl
 	end
 
+	-- ===== INFO ROW =====
+
 	local function CreateInfoRow(parent, text)
-		local fakeTab = {_page = parent, _lib = Win}
-		setmetatable(fakeTab, {__index = KyxLib._TabMethods})
-		local l = fakeTab:Label(text)
-		local row = parent:FindFirstChildOfClass("TextLabel")
-		return row, row
+		local row = Instance.new("Frame", parent)
+		row.Size = UDim2.new(1,0,0,30); row.BackgroundColor3 = Theme.MainBG; row.BorderSizePixel = 0
+		Instance.new("UICorner", row).CornerRadius = UDim.new(0,8)
+		local lbl = Instance.new("TextLabel", row)
+		lbl.Text = text or ""; lbl.Size = UDim2.new(1,-16,1,0); lbl.Position = UDim2.new(0,10,0,0)
+		lbl.BackgroundTransparency = 1; lbl.TextColor3 = Theme.Text; lbl.Font = Enum.Font.Gotham; lbl.TextSize = 11; lbl.TextXAlignment = Enum.TextXAlignment.Left
+		return row, lbl
 	end
 
-	-- ── KeyExpiryLabel ref (compat with old minimize code) ──────────────
-	local KeyExpiryLabel = Win._keyLabel
+	-- ===== DROPDOWN (ใหม่!) =====
 
-	-- ── DropdownOverlay shim (compat with old code that checks it) ──────
-	local DropdownOverlay = Win._dropOverlay
-	local function CloseActiveDropdown() Win:_closeDropdown() end
+	-- overlay layer สำหรับ dropdown popup
+	local DropdownOverlay = Instance.new("Frame", ScreenGui)
+	DropdownOverlay.Size = UDim2.new(1,0,1,0)
+	DropdownOverlay.BackgroundTransparency = 1
+	DropdownOverlay.BorderSizePixel = 0
+	DropdownOverlay.ZIndex = 50
+	DropdownOverlay.Visible = false
 
-	-- ── Shutdown shim ───────────────────────────────────────────────────
-	local function Shutdown()
-		for _, c in pairs(Win._conns) do pcall(function() c:Disconnect() end) end
-		ScreenGui:Destroy()
-		pcall(function()
-			local fg = game:GetService("CoreGui"):FindFirstChild("__KYX_FPS")
-			if fg then fg:Destroy() end
+	local ActiveDropdown = nil
+
+	local function CloseActiveDropdown()
+		if ActiveDropdown then
+			ActiveDropdown:Destroy()
+			ActiveDropdown = nil
+		end
+		DropdownOverlay.Visible = false
+	end
+
+	DropdownOverlay.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		CloseActiveDropdown()
+	end
+	end)
+
+	local function CreateDropdown(parent, labelText, description, options, defaultVal, callback)
+		local selected = defaultVal or (options[1] or "\u{E40}\u{E25}\u{E37}\u{E2D}\u{E01}...")
+
+		local container = Instance.new("Frame", parent)
+		container.Size = UDim2.new(1,0,0,56)
+		container.BackgroundColor3 = Theme.MainBG
+		container.BorderSizePixel = 0
+		Instance.new("UICorner", container).CornerRadius = UDim.new(0,9)
+		local cStroke = Instance.new("UIStroke", container)
+		cStroke.Color = Theme.Border; cStroke.Thickness = 1; cStroke.Transparency = 0.85
+
+		local lbl = Instance.new("TextLabel", container)
+		lbl.Text = labelText
+		lbl.Size = UDim2.new(1,-16,0,18)
+		lbl.Position = UDim2.new(0,10,0,5)
+		lbl.BackgroundTransparency = 1
+		lbl.TextColor3 = Theme.Text
+		lbl.Font = Enum.Font.GothamBold
+		lbl.TextSize = 12
+		lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+		if description then
+			local desc = Instance.new("TextLabel", container)
+			desc.Text = description
+			desc.Size = UDim2.new(1,-16,0,12)
+			desc.Position = UDim2.new(0,10,0,22)
+			desc.BackgroundTransparency = 1
+			desc.TextColor3 = Theme.SubText
+			desc.Font = Enum.Font.Gotham
+			desc.TextSize = 9
+			desc.TextXAlignment = Enum.TextXAlignment.Left
+		end
+
+		-- dropdown button
+		local dropBtn = Instance.new("TextButton", container)
+		dropBtn.Size = UDim2.new(0,140,0,22)
+		dropBtn.Position = UDim2.new(1,-148,1,-28)
+		dropBtn.BackgroundColor3 = Theme.TopBar
+		dropBtn.BorderSizePixel = 0
+		dropBtn.Text = selected .. "  \u{25BE}"
+		dropBtn.TextColor3 = Theme.Accent
+		dropBtn.Font = Enum.Font.GothamBold
+		dropBtn.TextSize = 11
+		dropBtn.ZIndex = 3
+		Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0,6)
+		local dStroke = Instance.new("UIStroke", dropBtn)
+		dStroke.Color = Theme.Accent; dStroke.Thickness = 1; dStroke.Transparency = 0.6
+
+		dropBtn.MouseButton1Click:Connect(function()
+		if ActiveDropdown then
+			CloseActiveDropdown()
+			return
+		end
+
+		DropdownOverlay.Visible = true
+
+		-- สร้าง popup list
+		local absPos = dropBtn.AbsolutePosition
+		local absSize = dropBtn.AbsoluteSize
+
+		local popup = Instance.new("Frame", DropdownOverlay)
+		popup.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
+		popup.Size = UDim2.new(0, absSize.X, 0, math.min(#options, 6) * 28 + 8)
+		popup.BackgroundColor3 = Theme.DropdownBG
+		popup.BorderSizePixel = 0
+		popup.ZIndex = 60
+		Instance.new("UICorner", popup).CornerRadius = UDim.new(0,8)
+		local popStroke = Instance.new("UIStroke", popup)
+		popStroke.Color = Theme.Accent; popStroke.Thickness = 1; popStroke.Transparency = 0.5
+
+		local scrollList = Instance.new("ScrollingFrame", popup)
+		scrollList.Size = UDim2.new(1,-4,1,-4)
+		scrollList.Position = UDim2.new(0,2,0,2)
+		scrollList.BackgroundTransparency = 1
+		scrollList.BorderSizePixel = 0
+		scrollList.ScrollBarThickness = 3
+		scrollList.ScrollBarImageColor3 = Theme.Accent
+		scrollList.CanvasSize = UDim2.new(0,0,0,0)
+		scrollList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		scrollList.ZIndex = 61
+
+		local itemList = Instance.new("UIListLayout", scrollList)
+		itemList.Padding = UDim.new(0,2)
+		itemList.SortOrder = Enum.SortOrder.LayoutOrder
+
+		for _, opt in ipairs(options) do
+			local item = Instance.new("TextButton", scrollList)
+			item.Size = UDim2.new(1,0,0,26)
+			item.BackgroundColor3 = Theme.DropdownItem
+			item.BorderSizePixel = 0
+			item.Text = opt
+			item.TextColor3 = opt == selected and Theme.Accent or Theme.Text
+			item.Font = opt == selected and Enum.Font.GothamBold or Enum.Font.Gotham
+			item.TextSize = 11
+			item.ZIndex = 62
+			Instance.new("UICorner", item).CornerRadius = UDim.new(0,6)
+
+			item.MouseEnter:Connect(function()
+			if opt ~= selected then
+				TweenService:Create(item, TweenInfo.new(0.1), {BackgroundColor3=Color3.fromRGB(40,40,60)}):Play()
+			end
 		end)
-		print("[KYX HUB] Terminated & Cleaned up.")
+		item.MouseLeave:Connect(function()
+		if opt ~= selected then
+			TweenService:Create(item, TweenInfo.new(0.1), {BackgroundColor3=Theme.DropdownItem}):Play()
+		end
+	end)
+	item.MouseButton1Click:Connect(function()
+	selected = opt
+	dropBtn.Text = selected .. "  \u{25BE}"
+	CloseActiveDropdown()
+	if callback then callback(selected) end
+	end)
 	end
+
+	ActiveDropdown = popup
+	end)
+
+	return container, function() return selected end
+	end
+
+	-- ────────────────────────────────────────────────────────
 
 	-- ===== BUILD TABS =====
 
@@ -5379,6 +4835,8 @@ local function BuildGUI()
 
 	-- ===== FPS COUNTER =====
 
+	-- ────────────────────────────────────────────────────────
+
 	local FPSGui = Instance.new("ScreenGui")
 	FPSGui.Name = "__KYX_FPS"; FPSGui.ResetOnSpawn = false; FPSGui.Parent = CoreGui
 	local FPSLabel = Instance.new("TextLabel", FPSGui)
@@ -5389,24 +4847,124 @@ local function BuildGUI()
 	Instance.new("UICorner", FPSLabel).CornerRadius = UDim.new(0,6)
 	Instance.new("UIStroke", FPSLabel).Color = Color3.fromRGB(0,200,150)
 	task.spawn(function()
-		while task.wait(0.5) do
-			local fps = math.floor(1 / RunService.RenderStepped:Wait())
-			FPSLabel.Text = "  FPS  " .. fps
-			FPSLabel.TextColor3 = fps >= 55
-				and Color3.fromRGB(0,255,200)
-				or  fps >= 30 and Color3.fromRGB(255,200,0)
-				or  Color3.fromRGB(255,80,80)
-			if not _G.FPSBoost and not FPSGui.Parent then
-				FPSGui.Parent = CoreGui
-			end
-		end
+	while task.wait(0.5) do
+		local fps = math.floor(1 / RunService.RenderStepped:Wait())
+		FPSLabel.Text = "  FPS  "..fps
+		FPSLabel.TextColor3 = fps >= 55 and Color3.fromRGB(0,255,200) or fps >= 30 and Color3.fromRGB(255,200,0) or Color3.fromRGB(255,80,80)
+	end
 	end)
 
-	-- ── Hook Shutdown into KyxLib close ──────────────────────────
-	Win._closeBtn.MouseButton1Click:Connect(Shutdown)
+	-- ────────────────────────────────────────────────────────
 
-	print("[KYX HUB v16.7] Loaded ✓ | KyxLib UI | INSERT = Toggle | X = Close")
-	print("[KYX HUB] Tabs: Settings|Farm|Quest|SubFarm|SeaEvent|Island|Raid|Bounty|Teleport|Stats|Shop|Misc|Webhooks")
+	-- ===== WINDOW CONTROLS =====
+
+	-- ────────────────────────────────────────────────────────
+
+	local function Shutdown()
+		ScreenGui:Destroy(); FPSGui:Destroy()
+		for _, c in pairs(GeminiUI.GUIConnections) do if c then c:Disconnect() end end
+		print("[KYX HUB] Terminated & Cleaned up.")
+	end
+
+	CloseBtn.MouseButton1Click:Connect(Shutdown)
+	MinBtn.MouseButton1Click:Connect(function()
+	GeminiUI.Minimized = not GeminiUI.Minimized
+	if GeminiUI.Minimized then
+		-- ย่อเป็น 1:1 = 44x44 แสดงแค่ TitleBar
+		ContentFrame.Visible = false
+		TweenService:Create(MainFrame, TweenInfo.new(0.28, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0,44,0,44)
+		}):Play()
+		MinBtn.Text = "+"
+		-- ซ่อน label พวก title เพื่อให้ดูสะอาด
+		TitleText.Visible = false
+		SubTitleText.Visible = false
+		KeyExpiryLabel.Visible = false
+		AccentLine.Visible = false
+		-- ย้าย MinBtn ไปกลาง
+		TweenService:Create(MinBtn, TweenInfo.new(0.2), {Position=UDim2.new(0.5,-14,0.5,-14)}):Play()
+		CloseBtn.Visible = false
+	else
+		-- คืนขนาดเดิม
+		ContentFrame.Visible = true
+		TitleText.Visible = true
+		SubTitleText.Visible = true
+		KeyExpiryLabel.Visible = true
+		AccentLine.Visible = true
+		CloseBtn.Visible = true
+		TweenService:Create(MinBtn, TweenInfo.new(0.2), {Position=UDim2.new(1,-68,0.5,-14)}):Play()
+		TweenService:Create(MainFrame, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = GeminiUI.MainSize
+		}):Play()
+		MinBtn.Text = "\u{2212}"
+	end
+	end)
+
+	-- เก็บ drag state ใน GeminiUI table แทน local เพื่อลด local count
+	GeminiUI.dragging  = false
+	GeminiUI.dragStart = nil
+	GeminiUI.startPos  = nil
+
+	table.insert(GeminiUI.GUIConnections, TitleBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		GeminiUI.dragging  = true
+		GeminiUI.dragStart = input.Position
+		GeminiUI.startPos  = MainFrame.Position
+	end
+	end))
+	table.insert(GeminiUI.GUIConnections, UserInputService.InputChanged:Connect(function(input)
+	if GeminiUI.dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - GeminiUI.dragStart
+		local sp = GeminiUI.startPos
+		MainFrame.Position = UDim2.new(sp.X.Scale, sp.X.Offset+delta.X, sp.Y.Scale, sp.Y.Offset+delta.Y)
+	end
+	end))
+	table.insert(GeminiUI.GUIConnections, UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then GeminiUI.dragging = false end
+	end))
+	table.insert(GeminiUI.GUIConnections, UserInputService.InputBegan:Connect(function(input, processed)
+	if not processed and input.KeyCode == Enum.KeyCode.Insert then
+		GeminiUI.Visible = not GeminiUI.Visible
+		if GeminiUI.Visible then
+			MainFrame.Visible = true
+			TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			BackgroundTransparency = 0, Size = GeminiUI.Minimized and GeminiUI.MinSize or GeminiUI.MainSize
+			}):Play()
+		else
+			TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency=1}):Play()
+			task.delay(0.22, function() MainFrame.Visible = false end)
+		end
+	end
+	end))
+
+	-- ────────────────────────────────────────────────────────
+
+	-- ===== OPEN ANIMATION =====
+
+	-- ────────────────────────────────────────────────────────
+
+	MainFrame.Size = UDim2.new(0,670,0,0)
+	MainFrame.BackgroundTransparency = 1
+	MainFrame.Visible = true
+	task.wait(0.1)
+	TweenService:Create(MainFrame, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+	Size = GeminiUI.MainSize, BackgroundTransparency = 0
+	}):Play()
+	task.delay(0.5, function()
+	-- animated accent line shimmer
+	TweenService:Create(AccentLine, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 3, true), {BackgroundTransparency=0.6}):Play()
+	end)
+	task.delay(0.6, function()
+	-- title dot pulse
+	TweenService:Create(TitleDot, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 4, true), {BackgroundTransparency=0.4}):Play()
+	end)
+	task.delay(0.7, function()
+	-- border glow pulse
+	TweenService:Create(MainStroke, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 2, true), {Transparency=0.3}):Play()
+	end)
+
+	print("[KYX HUB v16.7] Loaded \u{2713} | All-in-One | INSERT = Toggle | X = Close")
+	print("[KYX HUB] Tabs: Settings | Farm | Quest | Sub Farm | Sea Event | Island | Raid | Bounty | Teleport | Misc")
 
 end -- end BuildGUI function
 
@@ -7489,6 +7047,6 @@ task.spawn(function()
 end)
 
 BuildGUI()
-elseif getgenv().mode == "PVP" then
-    print("noting")
+
+
 end
