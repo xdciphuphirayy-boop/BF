@@ -220,7 +220,7 @@
 ]]
 
 -- ============================================================
--- ===== KEY SYSTEM (ใช้ร่วมกันทั้ง Oneclick และ Normal) =====
+-- ===== KEY SYSTEM (ใช้ร่วมกันทั้ง Oneclick Normal PVP) =====
 -- ============================================================
 
 local function decodeKey()
@@ -286,7 +286,7 @@ local function checkKey()
     return true, string.format("✅ Key ถูกต้อง | เหลือ %d วัน %d ชั่วโมง %d นาที", days, hours, mins)
 end
 
-if getgenv().mode == "Oneclick" then
+if getgenv().mode == "Oneclick" then -- by mountain
     -- Oneclick script here
     local Stats     = game:GetService("Stats")
     local Players   = game:GetService("Players")
@@ -489,7 +489,7 @@ if getgenv().mode == "Oneclick" then
     end)
 
 
-elseif getgenv().mode == "normal" then
+elseif getgenv().mode == "normal" then -- by chase233_p
 
 	-- ===== ตรวจสอบ Key ก่อนโหลด (Normal Mode) =====
 	do
@@ -2889,6 +2889,7 @@ local function BuildGUI()
 	local MainFrame = Instance.new("Frame")
 	MainFrame.Name = "MainFrame"
 	MainFrame.Size = GeminiUI.MainSize
+	MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	MainFrame.BackgroundColor3 = Theme.MainBG
 	MainFrame.BorderSizePixel = 0
@@ -4861,7 +4862,8 @@ local function BuildGUI()
 	-- ────────────────────────────────────────────────────────
 
 	local function Shutdown()
-		ScreenGui:Destroy(); FPSGui:Destroy()
+		ScreenGui:Destroy()
+		pcall(function() FPSGui:Destroy() end)
 		for _, c in pairs(GeminiUI.GUIConnections) do if c then c:Disconnect() end end
 		print("[KYX HUB] Terminated & Cleaned up.")
 	end
@@ -4905,28 +4907,58 @@ local function BuildGUI()
 	GeminiUI.dragStart = nil
 	GeminiUI.startPos  = nil
 
-	table.insert(GeminiUI.GUIConnections, TitleBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		GeminiUI.dragging  = true
-		GeminiUI.dragStart = input.Position
-		GeminiUI.startPos  = MainFrame.Position
+	-- helper: แปลง position ปัจจุบันเป็น absolute offset (รองรับ Scale ด้วย)
+	local function getAbsolutePos()
+		local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+		local p = MainFrame.Position
+		return Vector2.new(p.X.Scale * vp.X + p.X.Offset, p.Y.Scale * vp.Y + p.Y.Offset)
 	end
-	end))
-	table.insert(GeminiUI.GUIConnections, UserInputService.InputChanged:Connect(function(input)
-	if GeminiUI.dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - GeminiUI.dragStart
-		local sp = GeminiUI.startPos
-		MainFrame.Position = UDim2.new(sp.X.Scale, sp.X.Offset+delta.X, sp.Y.Scale, sp.Y.Offset+delta.Y)
+
+	local function clampToScreen(x, y)
+		local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+		local sz = MainFrame.AbsoluteSize
+		local hw, hh = sz.X * 0.5, sz.Y * 0.5
+		x = math.clamp(x, hw, vp.X - hw)
+		y = math.clamp(y, hh, vp.Y - hh)
+		return x, y
 	end
-	end))
-	table.insert(GeminiUI.GUIConnections, UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then GeminiUI.dragging = false end
-	end))
+
+	local function onDragBegan(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+			GeminiUI.dragging  = true
+			GeminiUI.dragStart = Vector2.new(input.Position.X, input.Position.Y)
+			GeminiUI.startPos  = getAbsolutePos()
+		end
+	end
+
+	local function onDragMoved(input)
+		if not GeminiUI.dragging then return end
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch then
+			local delta = Vector2.new(input.Position.X, input.Position.Y) - GeminiUI.dragStart
+			local nx, ny = clampToScreen(GeminiUI.startPos.X + delta.X, GeminiUI.startPos.Y + delta.Y)
+			MainFrame.Position = UDim2.new(0, nx, 0, ny)
+		end
+	end
+
+	local function onDragEnded(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+			GeminiUI.dragging = false
+		end
+	end
+
+	table.insert(GeminiUI.GUIConnections, TitleBar.InputBegan:Connect(onDragBegan))
+	table.insert(GeminiUI.GUIConnections, UserInputService.InputChanged:Connect(onDragMoved))
+	table.insert(GeminiUI.GUIConnections, UserInputService.InputEnded:Connect(onDragEnded))
 	table.insert(GeminiUI.GUIConnections, UserInputService.InputBegan:Connect(function(input, processed)
 	if not processed and input.KeyCode == Enum.KeyCode.Insert then
 		GeminiUI.Visible = not GeminiUI.Visible
 		if GeminiUI.Visible then
 			MainFrame.Visible = true
+			-- คืน ContentFrame ให้ตรงกับ state minimize ปัจจุบัน
+			ContentFrame.Visible = not GeminiUI.Minimized
 			TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			BackgroundTransparency = 0, Size = GeminiUI.Minimized and GeminiUI.MinSize or GeminiUI.MainSize
 			}):Play()
@@ -4943,6 +4975,12 @@ local function BuildGUI()
 
 	-- ────────────────────────────────────────────────────────
 
+	-- แปลงตำแหน่งเริ่มต้นเป็น offset ล้วนก่อน animate เพื่อให้ drag ทำงานถูกต้องทันที
+	do
+		local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+		local cx, cy = vp.X * 0.5, vp.Y * 0.5
+		MainFrame.Position = UDim2.new(0, cx, 0, cy)
+	end
 	MainFrame.Size = UDim2.new(0,670,0,0)
 	MainFrame.BackgroundTransparency = 1
 	MainFrame.Visible = true
@@ -7048,5 +7086,6 @@ end)
 
 BuildGUI()
 
-
+elseif getgenv().mode == "PVP" then -- by x2nyx.real
+	print("noting")
 end
