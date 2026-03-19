@@ -314,18 +314,36 @@ if getgenv().mode == "\79\110\101\99\108\105\99\107" then -- by mountain
 
     -- ────────────────────────────────────────────────────────
 
+    -- CONFIG
+
+    -- ────────────────────────────────────────────────────────
+
+    -- โหลด config.lua ก่อน (set _G.Hinishi_Hub_Kaitun_Blox_Fruits)
+    pcall(function()
+        local cfg = loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-Hinishi/Hinishi-Hub/refs/heads/main/config"))()
+        _G.Hinishi_Hub_Kaitun_Blox_Fruits = cfg
+    end)
+
+    getgenv().Hermanos_Settings = { key = "17765cc1-061d-4c88-a8fb-5d5e5938c04a", PC = "Kaitun" }
+    getgenv().language = "thai"
+    getgenv().mode = "Oneclick"
+
+    -- ────────────────────────────────────────────────────────
+
     -- BLOCK OTHER SCRIPT UI
 
     -- ────────────────────────────────────────────────────────
 
-    -- บล็อก UI แรกที่เพิ่มเข้ามา (ครั้งเดียว)
+    -- บล็อก UI ทุกอันที่เพิ่มเข้ามาใน 5 วิ แล้วหยุด
     local _blockConn
     _blockConn = PlayerGui.ChildAdded:Connect(function(v)
         if v:IsA("\83\99\114\101\101\110\71\117\105") and v.Name ~= "\75\121\120\72\117\98\95\85\73" then
             task.wait()
             v.Enabled = false
-            _blockConn:Disconnect()
         end
+    end)
+    task.delay(5, function()
+        if _blockConn then _blockConn:Disconnect() end
     end)
 
     -- ────────────────────────────────────────────────────────
@@ -336,6 +354,9 @@ if getgenv().mode == "\79\110\101\99\108\105\99\107" then -- by mountain
 
     task.spawn(function()
         pcall(function()
+            -- ดึง config จากไฟล์แยก แล้ว set _G
+            local cfg = loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-Hinishi/Hinishi-Hub/refs/heads/main/config"))()
+            _G.Hinishi_Hub_Kaitun_Blox_Fruits = cfg
             loadstring(game:HttpGet("\104\116\116\112\115\58\47\47\114\97\119\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\68\101\118\45\72\105\110\105\115\104\105\47\72\105\110\105\115\104\105\45\72\117\98\47\114\101\102\115\47\104\101\97\100\115\47\109\97\105\110\47\75\97\105\116\117\110"))()
         end)
     end)
